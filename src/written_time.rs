@@ -6,5 +6,5 @@ use crate::Calendar;
 /// remember that operations on it can be vastly different from oper
 pub struct WrittenTime<Cal: Calendar> {
     cal: Cal,
-    written: Cal::Time,
+    data: Cal::Time,
 }
