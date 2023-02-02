@@ -78,4 +78,35 @@ pub trait CalendarTime<Cal: Calendar>: Sized {
 pub trait CalendarDuration<Cal: Calendar>: Sized {
     /// A duration that spans no time
     const ZERO: Self;
+
+    /// Add a duration to this time, returning `None` in case of overflow
+    fn checked_add(&self, rhs: &Cal::Duration) -> Option<Self>;
+
+    /// Add a duration to this time
+    fn add(&self, rhs: &Cal::Duration) -> Self {
+        self.checked_add(rhs)
+            .expect("overflow while adding two written durations")
+    }
+
+    /// Add a duration to this time
+    fn add_assign(&mut self, rhs: &Cal::Duration) {
+        *self = self.add(rhs);
+    }
+
+    /// Subtract a duration to this time, returning `None` in case of overflow
+    fn checked_sub(&self, rhs: &Cal::Duration) -> Option<Self>;
+
+    /// Subtract a duration to this time
+    fn sub(&self, rhs: &Cal::Duration) -> Self {
+        self.checked_sub(rhs)
+            .expect("overflow while subtracting two written durations")
+    }
+
+    /// Subtract a duration to this time
+    fn sub_assign(&mut self, rhs: &Cal::Duration) {
+        *self = self.sub(rhs);
+    }
+
+    /// Show this written time in the default human-readable format
+    fn display(&self, f: &mut std::fmt::Formatter<'_>);
 }
