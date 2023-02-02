@@ -1,16 +1,16 @@
 use crate::{Time, TimeResult, WrittenTimeResult};
 
 /// A calendar system, including timezone if need be
-pub trait Calendar {
+pub trait Calendar: Sized {
     /// The data needed to represent a time in this calendar
-    type Time: CalendarTime;
+    type Time: CalendarTime<Self>;
 
     /// The data needed to represent a duration in this calendar
-    type Duration;
+    type Duration: CalendarDuration<Self>;
 }
 
 /// Time as represented by a calendar
-pub trait CalendarTime: Sized {
+pub trait CalendarTime<Cal: Calendar>: Sized {
     /// Error raised when trying to parse an invalid string as a time in this calendar
     type ParseError;
 
@@ -27,4 +27,52 @@ pub trait CalendarTime: Sized {
     fn now() -> WrittenTimeResult<Self> {
         Self::from_time(&Time::now()).expect("Time should not go out of range before")
     }
+
+    /// Add a duration to this time, returning `None` in case of overflow
+    fn checked_add(&self, rhs: &Cal::Duration) -> Option<Self>;
+
+    /// Add a duration to this time
+    fn add(&self, rhs: &Cal::Duration) -> Self {
+        self.checked_add(rhs)
+            .expect("overflow while adding a duration to a time")
+    }
+
+    /// Add a duration to this time
+    fn add_assign(&mut self, rhs: &Cal::Duration) {
+        *self = self.add(rhs);
+    }
+
+    /// Subtract a duration to this time, returning `None` in case of overflow
+    fn checked_sub(&self, rhs: &Cal::Duration) -> Option<Self>;
+
+    /// Subtract a duration to this time
+    fn sub(&self, rhs: &Cal::Duration) -> Self {
+        self.checked_sub(rhs)
+            .expect("overflow while subtracting a duration from a time")
+    }
+
+    /// Subtract a duration to this time
+    fn sub_assign(&mut self, rhs: &Cal::Duration) {
+        *self = self.sub(rhs);
+    }
+
+    /// Return the duration elapsed since the other time
+    ///
+    /// Returns `None` on overflow
+    fn checked_duration_since(&self, _rhs: &Self) -> Option<Cal::Duration>;
+
+    /// Return the duration elapsed since the other time
+    fn duration_since(&self, rhs: &Self) -> Cal::Duration {
+        self.checked_duration_since(rhs)
+            .expect("overflow while subtracting two times")
+    }
+
+    /// Show this written time in the default human-readable format
+    fn display(&self, f: &mut std::fmt::Formatter<'_>);
+
+    /// Parse this written time from the default human-readable format
+    fn from_str(&self, s: &str);
 }
+
+/// Duration as represented by a calendar
+pub trait CalendarDuration<Cal: Calendar>: Sized {}

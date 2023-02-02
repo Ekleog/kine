@@ -109,7 +109,7 @@ impl<Cal: Calendar> Display for WrittenTime<Cal> {
 }
 
 impl<Cal: Calendar> FromStr for WrittenTime<Cal> {
-    type Err = <Cal::Time as CalendarTime>::ParseError;
+    type Err = <Cal::Time as CalendarTime<Cal>>::ParseError;
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         todo!()
