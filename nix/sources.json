@@ -1,0 +1,26 @@
+{
+    "fenix": {
+        "branch": "main",
+        "description": "Rust toolchains and rust analyzer nightly for nix [maintainer=@figsoda]",
+        "homepage": "",
+        "owner": "nix-community",
+        "repo": "fenix",
+        "rev": "1580ad0cce02eb1c929d6af28f93c82e1787819d",
+        "sha256": "19x9yqhm3p94skjjn7n5jbrx9anxbwib3lm8f9izspdnfpwd29pj",
+        "type": "tarball",
+        "url": "https://github.com/nix-community/fenix/archive/1580ad0cce02eb1c929d6af28f93c82e1787819d.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "nixpkgs": {
+        "branch": "nixpkgs-unstable",
+        "description": "Nix Packages collection",
+        "homepage": "",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "50e4dbf35b95fd2b96718b656ebcbc6f9fa3a4ab",
+        "sha256": "18gcwh4rr8dqjryp91jxridvq4id450fn6z4b42ppzfwzi157bl9",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/50e4dbf35b95fd2b96718b656ebcbc6f9fa3a4ab.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    }
+}
