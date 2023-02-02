@@ -59,7 +59,7 @@ pub trait CalendarTime<Cal: Calendar>: Sized {
     /// Return the duration elapsed since the other time
     ///
     /// Returns `None` on overflow
-    fn checked_duration_since(&self, _rhs: &Self) -> Option<Cal::Duration>;
+    fn checked_duration_since(&self, rhs: &Self) -> Option<Cal::Duration>;
 
     /// Return the duration elapsed since the other time
     fn duration_since(&self, rhs: &Self) -> Cal::Duration {
@@ -68,10 +68,10 @@ pub trait CalendarTime<Cal: Calendar>: Sized {
     }
 
     /// Show this written time in the default human-readable format
-    fn display(&self, f: &mut std::fmt::Formatter<'_>);
+    fn display(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result;
 
     /// Parse this written time from the default human-readable format
-    fn from_str(s: &str);
+    fn from_str(s: &str) -> Result<Self, Self::ParseError>;
 }
 
 /// Duration as represented by a calendar

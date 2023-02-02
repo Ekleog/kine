@@ -11,7 +11,7 @@ use crate::{calendar::CalendarDuration, Calendar};
 /// wildly in meaning. For instance, one month in the gregorian calendar can be
 /// between 29 and 31 days. But even one minute can be 59 or 60 seconds in UTC.
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct WrittenDuration<Cal: Calendar>(Cal::Duration);
+pub struct WrittenDuration<Cal: Calendar>(pub(crate) Cal::Duration);
 
 impl<Cal: Calendar> WrittenDuration<Cal> {
     /// A duration that spans no time
