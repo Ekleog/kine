@@ -108,5 +108,5 @@ pub trait CalendarDuration<Cal: Calendar>: Sized {
     }
 
     /// Show this written time in the default human-readable format
-    fn display(&self, f: &mut std::fmt::Formatter<'_>);
+    fn display(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result;
 }
