@@ -5,6 +5,6 @@ use crate::Calendar;
 /// Anything user-visible should probably be handled using this type. However,
 /// remember that operations on it can be vastly different from oper
 pub struct WrittenTime<Cal: Calendar> {
-    cal: Cal,
-    data: Cal::Time,
+    _cal: Cal,
+    _data: Cal::Time,
 }
