@@ -16,8 +16,22 @@ pub enum WrittenTimeResult<T> {
 
 impl<T> WrittenTimeResult<T> {
     /// Returns any way of writing the point in time
+    ///
+    /// Note that this panics if the value of `Many` is an empty vector, but this
+    /// would be an ill-formed value
     pub fn any(self) -> T {
-        todo!()
+        match self {
+            WrittenTimeResult::One(t) => t,
+            WrittenTimeResult::Many(v) => v.into_iter().next().unwrap(),
+        }
+    }
+
+    /// Maps this function on all instances of T in this result
+    pub fn map<U>(self, mut f: impl FnMut(T) -> U) -> WrittenTimeResult<U> {
+        match self {
+            WrittenTimeResult::One(t) => WrittenTimeResult::One(f(t)),
+            WrittenTimeResult::Many(v) => WrittenTimeResult::Many(v.into_iter().map(f).collect()),
+        }
     }
 }
 
@@ -43,7 +57,11 @@ impl TimeResult {
     /// Note that if the written time did not exist, this will return an approximate version
     /// of what it would have been if it did actually exist.
     pub fn any_approximate(self) -> Time {
-        todo!()
+        match self {
+            TimeResult::One(t) => t,
+            TimeResult::Many(v) => v.into_iter().next().unwrap(),
+            TimeResult::DidNotExist(t, _) => t,
+        }
     }
 }
 
