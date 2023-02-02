@@ -3,7 +3,7 @@ use std::{
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
-use crate::{Calendar, Duration, TimeResult, WrittenTime, WrittenTimeResult};
+use crate::{Calendar, Duration, WrittenTime, WrittenTimeResult};
 
 /// One instant in real-life
 ///
@@ -23,12 +23,11 @@ impl Time {
         todo!()
     }
 
-    pub fn write<Cal: Calendar>(&self) -> crate::Result<WrittenTimeResult<WrittenTime<Cal>>> {
-        WrittenTime::from_time(self)
-    }
-
-    pub fn read<Cal: Calendar>(t: WrittenTime<Cal>) -> crate::Result<TimeResult> {
-        t.as_time()
+    pub fn write<Cal: Calendar>(
+        &self,
+        cal: Cal,
+    ) -> crate::Result<WrittenTimeResult<WrittenTime<Cal>>> {
+        cal.write(self).map(|r| r.map(WrittenTime))
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow

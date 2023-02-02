@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{Calendar, CalendarTime, Time, TimeResult, WrittenDuration, WrittenTimeResult};
+use crate::{Calendar, CalendarTime, TimeResult, WrittenDuration, WrittenTimeResult};
 
 /// A date and time as indicated by a calendar
 ///
@@ -12,25 +12,20 @@ use crate::{Calendar, CalendarTime, Time, TimeResult, WrittenDuration, WrittenTi
 /// remember that operations on it can be vastly different from operations on
 /// regular times.
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct WrittenTime<Cal: Calendar>(Cal::Time);
+pub struct WrittenTime<Cal: Calendar>(pub(crate) Cal::Time);
 
 impl<Cal: Calendar> WrittenTime<Cal> {
     /// Retrieve the current time in this calendar
     ///
     /// This function is allowed to panic if the current time is not representable
     /// in this calendar. If this is a problem for you, please use `from_time`.
-    pub fn now() -> WrittenTimeResult<Self> {
-        Cal::Time::now().map(Self)
-    }
-
-    /// Find the possible ways of writing time `t` in this calendar system
-    pub fn from_time(t: &Time) -> crate::Result<WrittenTimeResult<Self>> {
-        Cal::Time::from_time(t).map(|r| r.map(Self))
+    pub fn now(cal: Cal) -> WrittenTimeResult<Self> {
+        cal.now().map(Self)
     }
 
     /// Find the possible times this written time could be about
-    pub fn as_time(&self) -> crate::Result<TimeResult> {
-        self.0.as_time()
+    pub fn read(&self) -> crate::Result<TimeResult> {
+        self.0.read()
     }
 
     /// Offset by a duration, returning `None` on overflow
@@ -107,9 +102,9 @@ impl<Cal: Calendar> Display for WrittenTime<Cal> {
 }
 
 impl<Cal: Calendar> FromStr for WrittenTime<Cal> {
-    type Err = <Cal::Time as CalendarTime<Cal>>::ParseError;
+    type Err = Cal::ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Cal::Time::from_str(s).map(Self)
+        Cal::from_str(s).map(Self)
     }
 }

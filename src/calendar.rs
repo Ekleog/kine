@@ -1,32 +1,36 @@
 use crate::{Time, TimeResult, WrittenTimeResult};
 
 /// A calendar system, including timezone if need be
-pub trait Calendar: Sized {
+pub trait Calendar {
     /// The data needed to represent a time in this calendar
     type Time: CalendarTime<Self>;
 
     /// The data needed to represent a duration in this calendar
     type Duration: CalendarDuration<Self>;
-}
 
-/// Time as represented by a calendar
-pub trait CalendarTime<Cal: Calendar>: Sized {
     /// Error raised when trying to parse an invalid string as a time in this calendar
     type ParseError;
 
     /// Find the possible ways of writing time `t` in this calendar system
-    fn from_time(t: &Time) -> crate::Result<WrittenTimeResult<Self>>;
-
-    /// Find the possible times this written time could be about
-    fn as_time(&self) -> crate::Result<TimeResult>;
+    fn write(&self, t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>>;
 
     /// Retrieve the current time in this calendar
     ///
     /// This function is allowed to panic if the current time is not representable
     /// in this calendar. If this is a problem for you, please use `from_time`.
-    fn now() -> WrittenTimeResult<Self> {
-        Self::from_time(&Time::now()).expect("Time should not go out of range before")
+    fn now(&self) -> WrittenTimeResult<Self::Time> {
+        self.write(&Time::now())
+            .expect("Time should not go out of range before the heat death of the earth")
     }
+
+    /// Parse this written time from the default human-readable format
+    fn from_str(s: &str) -> Result<Self::Time, Self::ParseError>;
+}
+
+/// Time as represented by a calendar
+pub trait CalendarTime<Cal: ?Sized + Calendar>: Sized {
+    /// Find the possible times this written time could be about
+    fn read(&self) -> crate::Result<TimeResult>;
 
     /// Add a duration to this time, returning `None` in case of overflow
     fn checked_add(&self, rhs: &Cal::Duration) -> Option<Self>;
@@ -69,13 +73,10 @@ pub trait CalendarTime<Cal: Calendar>: Sized {
 
     /// Show this written time in the default human-readable format
     fn display(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result;
-
-    /// Parse this written time from the default human-readable format
-    fn from_str(s: &str) -> Result<Self, Self::ParseError>;
 }
 
 /// Duration as represented by a calendar
-pub trait CalendarDuration<Cal: Calendar>: Sized {
+pub trait CalendarDuration<Cal: ?Sized + Calendar>: Sized {
     /// A duration that spans no time
     const ZERO: Self;
 
@@ -107,6 +108,6 @@ pub trait CalendarDuration<Cal: Calendar>: Sized {
         *self = self.sub(rhs);
     }
 
-    /// Show this written time in the default human-readable format
+    /// Show this written duration in the default human-readable format
     fn display(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result;
 }
