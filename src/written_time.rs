@@ -1,6 +1,10 @@
-use std::{ops::{Add, AddAssign, Sub, SubAssign}, fmt::{Debug, Display}, str::FromStr};
+use std::{
+    fmt::{Debug, Display},
+    ops::{Add, AddAssign, Sub, SubAssign},
+    str::FromStr,
+};
 
-use crate::{Calendar, WrittenDuration, CalendarTime, WrittenTimeResult, TimeResult, Time};
+use crate::{Calendar, CalendarTime, Time, TimeResult, WrittenDuration, WrittenTimeResult};
 
 /// A date and time as indicated by a calendar
 ///
