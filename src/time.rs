@@ -23,77 +23,86 @@ impl Time {
         todo!()
     }
 
-    pub fn write<Cal: Calendar>(&self) -> WrittenTimeResult<WrittenTime<Cal>> {
-        todo!()
+    pub fn write<Cal: Calendar>(&self) -> crate::Result<WrittenTimeResult<WrittenTime<Cal>>> {
+        WrittenTime::from_time(self)
     }
 
-    pub fn read<Cal: Calendar>(_t: WrittenTime<Cal>) -> TimeResult {
-        todo!()
-    }
-
-    /// Offset by a duration, returning `None` on (however unlikely) overflow
-    pub fn checked_add(&self, _rhs: &Duration) -> Option<Time> {
-        todo!()
+    pub fn read<Cal: Calendar>(t: WrittenTime<Cal>) -> crate::Result<TimeResult> {
+        t.as_time()
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow
-    pub fn checked_sub(&self, _rhs: &Duration) -> Option<Time> {
-        todo!()
+    pub fn checked_add(&self, rhs: &Duration) -> Option<Time> {
+        self.nanos
+            .checked_add(rhs.nanos)
+            .map(|nanos| Time { nanos })
+    }
+
+    /// Offset by a duration, returning `None` on (however unlikely) overflow
+    pub fn checked_sub(&self, rhs: &Duration) -> Option<Time> {
+        self.nanos
+            .checked_sub(rhs.nanos)
+            .map(|nanos| Time { nanos })
     }
 
     /// Return the duration elapsed since the other point in time
-    pub fn duration_since(&self, _rhs: &Time) -> Duration {
-        todo!()
+    pub fn duration_since(&self, rhs: &Time) -> Duration {
+        self.checked_duration_since(rhs)
+            .expect("overflow computing duration since another time")
     }
 
     /// Return the duration elapsed since the other point in time
     ///
     /// Returns `None` on the (however unlikely) overflow
-    pub fn checked_duration_since(&self, _rhs: &Time) -> Option<Duration> {
-        todo!()
+    pub fn checked_duration_since(&self, rhs: &Time) -> Option<Duration> {
+        self.nanos
+            .checked_sub(rhs.nanos)
+            .map(|nanos| Duration { nanos })
     }
 }
 
 impl Add<Duration> for Time {
     type Output = Time;
 
-    fn add(self, _rhs: Duration) -> Self::Output {
-        todo!()
+    fn add(self, rhs: Duration) -> Self::Output {
+        self.checked_add(&rhs)
+            .expect("overflow adding duration to a time")
     }
 }
 
 impl AddAssign<Duration> for Time {
-    fn add_assign(&mut self, _rhs: Duration) {
-        todo!()
+    fn add_assign(&mut self, rhs: Duration) {
+        *self = *self + rhs;
     }
 }
 
 impl Sub<Duration> for Time {
     type Output = Time;
 
-    fn sub(self, _rhs: Duration) -> Self::Output {
-        todo!()
+    fn sub(self, rhs: Duration) -> Self::Output {
+        self.checked_sub(&rhs)
+            .expect("overflow subtracting duration from a time")
     }
 }
 
 impl SubAssign<Duration> for Time {
-    fn sub_assign(&mut self, _rhs: Duration) {
-        todo!()
+    fn sub_assign(&mut self, rhs: Duration) {
+        *self = *self - rhs;
     }
 }
 
 impl Sub<Time> for Time {
     type Output = Duration;
 
-    fn sub(self, _rhs: Time) -> Self::Output {
-        todo!()
+    fn sub(self, rhs: Time) -> Self::Output {
+        self.duration_since(&rhs)
     }
 }
 
 // TODO: also introduce all the & variants
 
 impl Debug for Time {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!() // TODO: format as TAI?
     }
 }

@@ -8,7 +8,7 @@ use std::{
 /// It can represent time intervals of roughly 10^22 years either way.
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Duration {
-    nanos: i128,
+    pub(crate) nanos: i128,
 }
 
 const NANOS_IN_MICROS: i128 = 1000;
