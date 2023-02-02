@@ -85,6 +85,16 @@ impl Duration {
     pub fn hours(&self) -> i128 {
         todo!()
     }
+
+    /// Add `rhs`, returning `None` on overflow
+    pub fn checked_add(&self, _rhs: &Duration) -> Option<Self> {
+        todo!()
+    }
+
+    /// Subtract `rhs`, returning `None` on overflow
+    pub fn checked_sub(&self, _rhs: &Duration) -> Option<Self> {
+        todo!()
+    }
 }
 
 impl Add<Duration> for Duration {

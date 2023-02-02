@@ -20,6 +20,16 @@ impl<Cal: Calendar> WrittenDuration<Cal> {
     pub const ZERO: Self = Self {
         data: <Cal::Duration as CalendarDuration<Cal>>::ZERO,
     };
+
+    /// Add `rhs`, returning `None` on overflow
+    pub fn checked_add(&self, _rhs: &WrittenDuration<Cal>) -> Option<Self> {
+        todo!()
+    }
+
+    /// Subtract `rhs`, returning `None` on overflow
+    pub fn checked_sub(&self, _rhs: &WrittenDuration<Cal>) -> Option<Self> {
+        todo!()
+    }
 }
 
 impl<Cal: Calendar> Add<WrittenDuration<Cal>> for WrittenDuration<Cal> {
