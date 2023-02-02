@@ -105,7 +105,14 @@ impl Sub<Time> for Time {
 // TODO: also introduce all the & variants
 
 impl Debug for Time {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!() // TODO: format as TAI?
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        const NANOS_IN_SEC: i128 = 1_000_000_000;
+
+        write!(
+            f,
+            "{}.{}",
+            self.nanos / NANOS_IN_SEC,
+            (self.nanos % NANOS_IN_SEC).abs(),
+        )
     }
 }
