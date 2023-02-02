@@ -28,24 +28,24 @@ impl Time {
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow
-    pub fn checked_add(&self, _rhs: Duration) -> Option<Time> {
+    pub fn checked_add(&self, _rhs: &Duration) -> Option<Time> {
         todo!()
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow
-    pub fn checked_sub(&self, _rhs: Duration) -> Option<Time> {
+    pub fn checked_sub(&self, _rhs: &Duration) -> Option<Time> {
         todo!()
     }
 
     /// Return the duration elapsed since the other point in time
-    pub fn duration_since(&self, _rhs: Time) -> Duration {
+    pub fn duration_since(&self, _rhs: &Time) -> Duration {
         todo!()
     }
 
     /// Return the duration elapsed since the other point in time
     ///
     /// Returns `None` on the (however unlikely) overflow
-    pub fn checked_duration_since(&self, _rhs: Time) -> Option<Duration> {
+    pub fn checked_duration_since(&self, _rhs: &Time) -> Option<Duration> {
         todo!()
     }
 }
@@ -85,6 +85,8 @@ impl Sub<Time> for Time {
         todo!()
     }
 }
+
+// TODO: also introduce all the & variants
 
 impl Debug for Time {
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

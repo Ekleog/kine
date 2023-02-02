@@ -39,6 +39,9 @@ pub enum TimeResult {
 
 /// Time as represented by a calendar
 pub trait CalendarTime: Sized {
+    /// Error raised when trying to parse an invalid string as a time in this calendar
+    type ParseError;
+
     /// Find the possible ways of writing time `t` in this calendar system
     fn from_time(t: &Time) -> crate::Result<WrittenTimeResult<Self>>;
 
