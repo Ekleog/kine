@@ -1,6 +1,8 @@
 use std::marker::PhantomData;
 
-use crate::{CalendarDuration, Gregorian, TimeZone};
+use kine_core::CalendarDuration;
+
+use crate::{Gregorian, TimeZone};
 
 pub struct GregorianDuration<Tz: TimeZone> {
     tz: PhantomData<Tz>,

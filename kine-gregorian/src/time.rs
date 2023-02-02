@@ -1,4 +1,6 @@
-use crate::{CalendarTime, Gregorian, TimeZone};
+use kine_core::CalendarTime;
+
+use crate::{Gregorian, TimeZone};
 
 pub struct GregorianTime<Tz: TimeZone> {
     tz: Tz,
@@ -12,22 +14,22 @@ pub struct GregorianTime<Tz: TimeZone> {
 }
 
 impl<Tz: TimeZone> CalendarTime<Gregorian<Tz>> for GregorianTime<Tz> {
-    fn read(&self) -> crate::Result<crate::TimeResult> {
+    fn read(&self) -> kine_core::Result<kine_core::TimeResult> {
         todo!()
     }
 
-    fn checked_add(&self, _rhs: &<Gregorian<Tz> as crate::Calendar>::Duration) -> Option<Self> {
+    fn checked_add(&self, _rhs: &<Gregorian<Tz> as kine_core::Calendar>::Duration) -> Option<Self> {
         todo!()
     }
 
-    fn checked_sub(&self, _rhs: &<Gregorian<Tz> as crate::Calendar>::Duration) -> Option<Self> {
+    fn checked_sub(&self, _rhs: &<Gregorian<Tz> as kine_core::Calendar>::Duration) -> Option<Self> {
         todo!()
     }
 
     fn checked_duration_since(
         &self,
         _rhs: &Self,
-    ) -> Option<<Gregorian<Tz> as crate::Calendar>::Duration> {
+    ) -> Option<<Gregorian<Tz> as kine_core::Calendar>::Duration> {
         todo!()
     }
 

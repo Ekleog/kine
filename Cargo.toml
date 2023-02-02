@@ -1,7 +1,10 @@
-[package]
-name = "kine"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = [
+    "kine",
+    "kine-core",
+    "kine-gregorian",
+]
 
-[dependencies]
+[workspace.dependencies]
+kine-core = { path = "./kine-core" }
 thiserror = "1.0"
