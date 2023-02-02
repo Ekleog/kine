@@ -15,7 +15,17 @@ pub struct GregorianDuration<Tz: TimeZone> {
 }
 
 impl<Tz: TimeZone> CalendarDuration<Gregorian<Tz>> for GregorianDuration<Tz> {
-    const ZERO: Self = todo!();
+    const ZERO: Self = GregorianDuration {
+        tz: PhantomData,
+        years: 0,
+        months: 0,
+        weeks: 0,
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        nanoseconds: 0,
+    };
 
     fn checked_add(&self, rhs: &<Gregorian<Tz> as crate::Calendar>::Duration) -> Option<Self> {
         Some(Self {
