@@ -1,0 +1,39 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pages:
+    name: Push documentation to pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+      - run: nix-shell --pure --run 'RUSTDOCFLAGS="-Zunstable-options --enable-index-page" cargo doc --all-features'
+      - run: mkdir doc
+      - run: mv target/doc doc/dev-doc
+      - name: Deploy to GitHub
+        env:
+          GITHUB_DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          
+          touch doc/.nojekyll
+          cd doc
+          rm -rf .git
+          git init
+          git config user.name 'Deploy from CI'
+          git config user.email ''
+          git add .
+          git commit -m "Deploy ${GITHUB_SHA} to gh-pages"
+          
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+          eval "$(ssh-agent)"
+          sleep 1
+          echo "$GITHUB_DEPLOY_KEY" > deploy_key
+          chmod 0600 deploy_key
+          ssh-add deploy_key
+          
+          git push -f git@github.com:Ekleog/kine HEAD:gh-pages

@@ -1,0 +1,28 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  cargo-fmt:
+    name: Cargo Fmt, Clippy and Udeps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+      - run: rm -rf ~/.cargo/bin
+      - run: nix-shell --pure --run 'cargo fmt --all -- --check'
+      - run: nix-shell --pure --run 'cargo clippy --all --all-features -- -D warnings'
+      - run: nix-shell --pure --run 'cargo udeps --all-targets'
+
+  cargo-tests:
+    name: Cargo Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+      - run: nix-shell --pure --run 'cargo build --all --all-features'
+      - run: nix-shell --pure --run 'cargo test --all --all-features'
+      - run: nix-shell --pure --run 'cargo doc --all --all-features '
