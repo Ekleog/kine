@@ -115,6 +115,12 @@ impl SubAssign<Duration> for Duration {
     }
 }
 
+impl Default for Duration {
+    fn default() -> Self {
+        todo!()
+    }
+}
+
 impl Debug for Duration {
     fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!()

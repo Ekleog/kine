@@ -75,4 +75,7 @@ pub trait CalendarTime<Cal: Calendar>: Sized {
 }
 
 /// Duration as represented by a calendar
-pub trait CalendarDuration<Cal: Calendar>: Sized {}
+pub trait CalendarDuration<Cal: Calendar>: Sized {
+    /// A duration that spans no time
+    const ZERO: Self;
+}
