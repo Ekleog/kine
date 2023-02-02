@@ -5,7 +5,7 @@ mod time;
 mod written_duration;
 mod written_time;
 
-pub use calendar::{Calendar, CalendarTime};
+pub use calendar::{Calendar, CalendarDuration, CalendarTime};
 pub use duration::Duration;
 pub use results::{Error, Result, TimeResult, WrittenTimeResult};
 pub use time::Time;
