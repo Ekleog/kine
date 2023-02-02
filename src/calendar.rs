@@ -71,7 +71,7 @@ pub trait CalendarTime<Cal: Calendar>: Sized {
     fn display(&self, f: &mut std::fmt::Formatter<'_>);
 
     /// Parse this written time from the default human-readable format
-    fn from_str(&self, s: &str);
+    fn from_str(s: &str);
 }
 
 /// Duration as represented by a calendar
