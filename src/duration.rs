@@ -11,134 +11,168 @@ pub struct Duration {
     nanos: i128,
 }
 
+const NANOS_IN_MICROS: i128 = 1000;
+const NANOS_IN_MILLIS: i128 = NANOS_IN_MICROS * 1000;
+const NANOS_IN_SECS: i128 = NANOS_IN_MILLIS * 1000;
+const NANOS_IN_MINS: i128 = NANOS_IN_SECS * 60;
+const NANOS_IN_HOURS: i128 = NANOS_IN_MINS * 60;
+
 impl Duration {
     pub const ZERO: Duration = Duration { nanos: 0 };
 
     /// Create a Duration that lasts for `nanos` nanoseconds
     ///
     /// This cannot panic.
-    pub fn from_nanos(_nanos: i128) -> Duration {
-        todo!()
+    pub fn from_nanos(nanos: i128) -> Duration {
+        Duration { nanos }
     }
 
     /// Create a Duration that lasts for `micros` microseconds
     ///
     /// This cannot panic.
-    pub fn from_micros(_micros: i64) -> Duration {
-        todo!()
+    pub fn from_micros(micros: i64) -> Duration {
+        Duration {
+            nanos: micros as i128 * NANOS_IN_MICROS,
+        }
     }
 
     /// Create a Duration that lasts for `millis` milliseconds
     ///
     /// This cannot panic.
-    pub fn from_millis(_millis: i64) -> Duration {
-        todo!()
+    pub fn from_millis(millis: i64) -> Duration {
+        Duration {
+            nanos: millis as i128 * NANOS_IN_MILLIS,
+        }
     }
 
     /// Create a Duration that lasts for `secs` seconds
     ///
     /// This cannot panic.
-    pub fn from_secs(_secs: i64) -> Duration {
-        todo!()
+    pub fn from_secs(secs: i64) -> Duration {
+        Duration {
+            nanos: secs as i128 * NANOS_IN_SECS,
+        }
     }
 
     /// Create a Duration that lasts for `mins` minutes
     ///
     /// This cannot panic.
-    pub fn from_minutes(_mins: i64) -> Duration {
-        todo!()
+    pub fn from_minutes(mins: i64) -> Duration {
+        Duration {
+            nanos: mins as i128 * NANOS_IN_MINS,
+        }
     }
 
     /// Create a Duration that lasts for `hours` hours
     ///
     /// This cannot panic.
-    pub fn from_hours(_hours: i64) -> Duration {
-        todo!()
+    pub fn from_hours(hours: i64) -> Duration {
+        Duration {
+            nanos: hours as i128 * NANOS_IN_HOURS,
+        }
     }
 
     /// Retrieve the number of nanoseconds this Duration is
     pub fn nanos(&self) -> i128 {
-        todo!()
+        self.nanos
     }
 
     /// Retrieve the number of microseconds this Duration is
     pub fn micros(&self) -> i128 {
-        todo!()
+        self.nanos / NANOS_IN_MICROS
     }
 
     /// Retrieve the number of milliseconds this Duration is
     pub fn millis(&self) -> i128 {
-        todo!()
+        self.nanos / NANOS_IN_MILLIS
     }
 
     /// Retrieve the number of seconds this Duration is
     pub fn secs(&self) -> i128 {
-        todo!()
+        self.nanos / NANOS_IN_SECS
     }
 
     /// Retrieve the number of minutes this Duration is
     pub fn mins(&self) -> i128 {
-        todo!()
+        self.nanos / NANOS_IN_MINS
     }
 
     /// Retrieve the number of hours this Duration is
     pub fn hours(&self) -> i128 {
-        todo!()
+        self.nanos / NANOS_IN_HOURS
     }
 
     /// Add `rhs`, returning `None` on overflow
-    pub fn checked_add(&self, _rhs: &Duration) -> Option<Self> {
-        todo!()
+    pub fn checked_add(&self, rhs: &Duration) -> Option<Self> {
+        self.nanos
+            .checked_add(rhs.nanos)
+            .map(|nanos| Duration { nanos })
     }
 
     /// Subtract `rhs`, returning `None` on overflow
-    pub fn checked_sub(&self, _rhs: &Duration) -> Option<Self> {
-        todo!()
+    pub fn checked_sub(&self, rhs: &Duration) -> Option<Self> {
+        self.nanos
+            .checked_sub(rhs.nanos)
+            .map(|nanos| Duration { nanos })
     }
 }
 
 impl Add<Duration> for Duration {
     type Output = Duration;
 
-    fn add(self, _rhs: Self) -> Self::Output {
-        todo!()
+    fn add(self, rhs: Self) -> Self::Output {
+        self.checked_add(&rhs)
+            .expect("overflow while adding durations")
     }
 }
 
 impl AddAssign<Duration> for Duration {
-    fn add_assign(&mut self, _rhs: Duration) {
-        todo!()
+    fn add_assign(&mut self, rhs: Duration) {
+        *self = *self + rhs
     }
 }
 
 impl Sub<Duration> for Duration {
     type Output = Duration;
 
-    fn sub(self, _rhs: Duration) -> Self::Output {
-        todo!()
+    fn sub(self, rhs: Duration) -> Self::Output {
+        self.checked_sub(&rhs)
+            .expect("overflow while subtracting durations")
     }
 }
 
 impl SubAssign<Duration> for Duration {
-    fn sub_assign(&mut self, _rhs: Duration) {
-        todo!()
+    fn sub_assign(&mut self, rhs: Duration) {
+        *self = *self - rhs
     }
 }
 
 impl Default for Duration {
     fn default() -> Self {
-        todo!()
+        Duration::ZERO
     }
 }
 
 impl Debug for Duration {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        <Duration as Display>::fmt(self, f)
     }
 }
 
 impl Display for Duration {
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.nanos % NANOS_IN_HOURS == 0 {
+            write!(f, "{}h", self.nanos / NANOS_IN_HOURS)
+        } else if self.nanos % NANOS_IN_MINS == 0 {
+            write!(f, "{}min", self.nanos / NANOS_IN_MINS)
+        } else if self.nanos % NANOS_IN_SECS == 0 {
+            write!(f, "{}s", self.nanos / NANOS_IN_SECS)
+        } else if self.nanos % NANOS_IN_MILLIS == 0 {
+            write!(f, "{}ms", self.nanos / NANOS_IN_MILLIS)
+        } else {
+            // Do not actually check micros: it's probably not worth it and greek
+            // letters may be surprising
+            write!(f, "{}ns", self.nanos)
+        }
     }
 }
