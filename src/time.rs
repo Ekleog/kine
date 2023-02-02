@@ -102,7 +102,7 @@ impl Sub<Time> for Time {
 // TODO: also introduce all the & variants
 
 impl Debug for Time {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!() // TODO: format as TAI?
     }
 }
