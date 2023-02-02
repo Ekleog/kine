@@ -3,7 +3,7 @@ use std::{
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
-use crate::{Calendar, Duration, WrittenTime, WrittenTimeResult};
+use crate::{Calendar, CalendarTime, Duration, TimeResult, WrittenTime, WrittenTimeResult};
 
 /// One instant in real-life
 ///
@@ -21,6 +21,10 @@ impl Time {
     /// Return the current time
     pub fn now() -> Time {
         todo!()
+    }
+
+    pub fn read<Tim: CalendarTime>(t: Tim) -> crate::Result<TimeResult> {
+        t.read()
     }
 
     pub fn write<Cal: Calendar>(
