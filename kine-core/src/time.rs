@@ -27,7 +27,7 @@ impl Time {
         &self,
         cal: Cal,
     ) -> crate::Result<WrittenTimeResult<WrittenTime<Cal>>> {
-        cal.write(self).map(|r| r.map(WrittenTime))
+        cal.write(self)
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow
