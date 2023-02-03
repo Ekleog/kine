@@ -40,8 +40,17 @@ impl System {
     ///
     /// Note that this is infallible, as the system calendar is by definition always able to
     /// store a time returned by the system clock.
+    #[cfg(feature = "std")]
     pub fn now() -> SystemTime {
-        todo!()
+        let duration = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("Current time was before posix epoch");
+        let pseudo_nanos = i128::try_from(duration.as_nanos())
+            .expect("Overflow trying to retrieve the current time");
+        SystemTime(LeapSecondedTime::from_pseudo_nanos_from_posix_epoch(
+            leap_seconds::SystemProvider::default(),
+            pseudo_nanos,
+        ))
     }
 }
 

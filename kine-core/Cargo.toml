@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 leap-seconds-provider-builtin = []
+std = []
 
 [dependencies]
 cfg-if.workspace = true

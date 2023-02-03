@@ -13,7 +13,17 @@ const NANOS_IN_SEC: i128 = 1_000_000_000;
 /// A time relative
 pub struct LeapSecondedTime<Src> {
     source: Src,
-    nanos: i128,
+    pseudo_nanos: i128,
+}
+
+impl<Src> LeapSecondedTime<Src> {
+    /// Return the number of pseudo-nanoseconds between this time and the POSIX epoch
+    pub(crate) fn from_pseudo_nanos_from_posix_epoch(source: Src, pseudo_nanos: i128) -> Self {
+        Self {
+            source,
+            pseudo_nanos,
+        }
+    }
 }
 
 impl<Src> CalendarTime for LeapSecondedTime<Src>
@@ -30,8 +40,8 @@ impl<Src: LeapSecondProvider> Display for LeapSecondedTime<Src> {
         write!(
             f,
             "{}.{}{}",
-            self.nanos / NANOS_IN_SEC,
-            (self.nanos % NANOS_IN_SEC).abs(),
+            self.pseudo_nanos / NANOS_IN_SEC,
+            (self.pseudo_nanos % NANOS_IN_SEC).abs(),
             self.source.sigil(),
         )
     }
@@ -71,7 +81,7 @@ impl<Src: Default> FromStr for LeapSecondedTime<Src> {
         };
         Ok(Self {
             source: Src::default(),
-            nanos: seconds
+            pseudo_nanos: seconds
                 .checked_mul(NANOS_IN_SEC)
                 .ok_or(ParseError::Overflow)?
                 .checked_add(nanos)
