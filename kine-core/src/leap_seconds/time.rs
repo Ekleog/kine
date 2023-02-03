@@ -14,15 +14,32 @@ const NANOS_IN_SEC: i128 = 1_000_000_000;
 pub struct LeapSecondedTime<Src> {
     source: Src,
     pseudo_nanos: i128,
+    in_leap_second: bool,
 }
 
 impl<Src> LeapSecondedTime<Src> {
-    /// Return the number of pseudo-nanoseconds between this time and the POSIX epoch
-    pub(crate) fn from_pseudo_nanos_from_posix_epoch(source: Src, pseudo_nanos: i128) -> Self {
+    /// Build a `LeapSecondedTime` from the number of pseudo-nanoseconds between this time
+    /// and the POSIX epoch
+    pub(crate) fn from_pseudo_nanos_since_posix_epoch(
+        source: Src,
+        pseudo_nanos: i128,
+        in_leap_second: bool,
+    ) -> Self {
         Self {
             source,
             pseudo_nanos,
+            in_leap_second,
         }
+    }
+
+    /// Return the number of pseudo-nanoseconds between this time and the POSIX epoch
+    pub fn as_pseudo_nanos_since_posix_epoch(&self) -> i128 {
+        self.pseudo_nanos
+    }
+
+    /// Return `true` iff this time is currently undergoing a leap second
+    pub fn in_leap_second(&self) -> bool {
+        self.in_leap_second
     }
 }
 
@@ -49,7 +66,11 @@ impl<Src: LeapSecondProvider> Display for LeapSecondedTime<Src> {
 
 impl<Src: LeapSecondProvider> Debug for LeapSecondedTime<Src> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        <Self as Display>::fmt(self, f)
+        <Self as Display>::fmt(self, f)?;
+        if self.in_leap_second {
+            f.write_str("(+1)")?;
+        }
+        Ok(())
     }
 }
 
@@ -86,6 +107,9 @@ impl<Src: Default> FromStr for LeapSecondedTime<Src> {
                 .ok_or(ParseError::Overflow)?
                 .checked_add(nanos)
                 .ok_or(ParseError::Overflow)?,
+            // Based only on a second number, it is impossible to differentiate between leap
+            // and non-leap
+            in_leap_second: false,
         })
     }
 }

@@ -47,9 +47,10 @@ impl System {
             .expect("Current time was before posix epoch");
         let pseudo_nanos = i128::try_from(duration.as_nanos())
             .expect("Overflow trying to retrieve the current time");
-        SystemTime(LeapSecondedTime::from_pseudo_nanos_from_posix_epoch(
+        SystemTime(LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
             leap_seconds::SystemProvider::default(),
             pseudo_nanos,
+            false,
         ))
     }
 }
