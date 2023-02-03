@@ -20,9 +20,15 @@ jobs:
   cargo-tests:
     name: Cargo Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        leap-seconds-provider: ["leap-seconds-provider-builtin-iers,"]
+        no-std: ["no-std,", ""]
+    env:
+      CARGO_FEATURES: ${{ matrix.leap-seconds-provider }}${{ matrix.no-std }}
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
-      - run: nix-shell --pure --run 'cargo build --all --all-features'
-      - run: nix-shell --pure --run 'cargo test --all --all-features'
-      - run: nix-shell --pure --run 'cargo doc --all --all-features '
+      - run: nix-shell --pure --run 'cargo build --all --features $CARGO_FEATURES'
+      - run: nix-shell --pure --run 'cargo test --all --features $CARGO_FEATURES'
+      - run: nix-shell --pure --run 'cargo doc --all --features $CARGO_FEATURES'
