@@ -2,10 +2,13 @@ use crate::{Time, TimeResult, WrittenTimeResult};
 
 use super::{LeapSecondedTime, SystemLeapSecondProvider};
 
+/// Name of the IERS Bulletin from which this list was taken (as a sigil)
+const BULLETIN: &str = " IERS-C65";
+
 /// List of leap seconds. Between -infinity and the first item here, the offset is 0.
 /// Between items n (included) and n + 1 (excluded, or +infinity) here, the offset is
 /// IERS_LEAP_SECS[n].1
-static _IERS_LEAP_SECS: &[(Time, i32)] = &[
+static LEAP_SECS: &[(Time, i32)] = &[
     (Time::from_posix_nanos(0), 10),
     (Time::from_posix_secs(15_724_800), 11),
     (Time::from_posix_secs(31_622_400), 12),
@@ -52,7 +55,7 @@ impl SystemLeapSecondProvider for BuiltinIers {
     }
 
     fn sigil() -> &'static str {
-        todo!()
+        BULLETIN
     }
 }
 
