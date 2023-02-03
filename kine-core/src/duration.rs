@@ -16,6 +16,8 @@ const NANOS_IN_MILLIS: i128 = NANOS_IN_MICROS * 1000;
 const NANOS_IN_SECS: i128 = NANOS_IN_MILLIS * 1000;
 const NANOS_IN_MINS: i128 = NANOS_IN_SECS * 60;
 const NANOS_IN_HOURS: i128 = NANOS_IN_MINS * 60;
+const NANOS_IN_DAYS: i128 = NANOS_IN_HOURS * 24;
+const NANOS_IN_WEEKS: i128 = NANOS_IN_DAYS * 7;
 
 impl Duration {
     pub const ZERO: Duration = Duration { nanos: 0 };
@@ -72,34 +74,62 @@ impl Duration {
         }
     }
 
+    /// Create a Duration that lasts for `days` days
+    ///
+    /// This cannot panic.
+    pub fn from_days(days: i64) -> Duration {
+        Duration {
+            nanos: days as i128 * NANOS_IN_DAYS,
+        }
+    }
+
+    /// Create a Duration that lasts for `weeks` weeks
+    ///
+    /// This cannot panic.
+    pub fn from_weeks(weeks: i64) -> Duration {
+        Duration {
+            nanos: weeks as i128 * NANOS_IN_WEEKS,
+        }
+    }
+
     /// Retrieve the number of nanoseconds this Duration is
     pub fn nanos(&self) -> i128 {
         self.nanos
     }
 
-    /// Retrieve the number of microseconds this Duration is
+    /// Retrieve the number of microseconds this Duration is (rounded to zero)
     pub fn micros(&self) -> i128 {
         self.nanos / NANOS_IN_MICROS
     }
 
-    /// Retrieve the number of milliseconds this Duration is
+    /// Retrieve the number of milliseconds this Duration is (rounded to zero)
     pub fn millis(&self) -> i128 {
         self.nanos / NANOS_IN_MILLIS
     }
 
-    /// Retrieve the number of seconds this Duration is
+    /// Retrieve the number of seconds this Duration is (rounded to zero)
     pub fn secs(&self) -> i128 {
         self.nanos / NANOS_IN_SECS
     }
 
-    /// Retrieve the number of minutes this Duration is
+    /// Retrieve the number of minutes this Duration is (rounded to zero)
     pub fn mins(&self) -> i128 {
         self.nanos / NANOS_IN_MINS
     }
 
-    /// Retrieve the number of hours this Duration is
+    /// Retrieve the number of hours this Duration is (rounded to zero)
     pub fn hours(&self) -> i128 {
         self.nanos / NANOS_IN_HOURS
+    }
+
+    /// Retrieve the number of days this Duration is (rounded to zero)
+    pub fn days(&self) -> i128 {
+        self.nanos / NANOS_IN_DAYS
+    }
+
+    /// Retrieve the number of weeks this Duration is (rounded to zero)
+    pub fn weeks(&self) -> i128 {
+        self.nanos / NANOS_IN_WEEKS
     }
 
     /// Add `rhs`, returning `None` on overflow
