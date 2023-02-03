@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.cargo.features": [
+        "std", "leap-seconds-provider-builtin"
+    ]
+}
