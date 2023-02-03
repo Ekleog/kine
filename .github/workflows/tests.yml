@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        leap-seconds-provider: ["leap-seconds-provider-builtin-iers,"]
-        no-std: ["no-std,", ""]
+        feat-leap-seconds-provider: ["leap-seconds-provider-builtin-iers,"]
+        feat-std: ["std,", ""]
     env:
-      CARGO_FEATURES: ${{ matrix.leap-seconds-provider }}${{ matrix.no-std }}
+      CARGO_FEATURES: ${{ matrix.feat-leap-seconds-provider }}${{ matrix.feat-std }}
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
