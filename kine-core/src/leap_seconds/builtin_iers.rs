@@ -1,6 +1,6 @@
-use crate::Time;
+use crate::{Time, TimeResult, WrittenTimeResult};
 
-use super::LeapSecondProvider;
+use super::{LeapSecondedTime, SystemLeapSecondProvider};
 
 /// List of leap seconds. Between -infinity and the first item here, the offset is 0.
 /// Between items n (included) and n + 1 (excluded, or +infinity) here, the offset is
@@ -42,4 +42,22 @@ static _IERS_LEAP_SECS: &[(Time, i32)] = &[
 /// IERS leap second table.
 pub struct BuiltinIers;
 
-impl LeapSecondProvider for BuiltinIers {}
+impl SystemLeapSecondProvider for BuiltinIers {
+    fn read(_t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
+        todo!()
+    }
+
+    fn write(_t: &Time) -> crate::Result<WrittenTimeResult<LeapSecondedTime<Self>>> {
+        todo!()
+    }
+
+    fn sigil() -> &'static str {
+        todo!()
+    }
+}
+
+impl Default for BuiltinIers {
+    fn default() -> Self {
+        Self
+    }
+}

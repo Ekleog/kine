@@ -1,12 +1,12 @@
 use core::{
-    cmp::min,
     fmt::{self, Debug, Display},
     str::FromStr,
 };
 
-use crate::{Calendar, CalendarTime};
-
-const NANOS_IN_SEC: i128 = 1_000_000_000;
+use crate::{
+    leap_seconds::{self, LeapSecondedTime, SystemLeapSecondProvider},
+    Calendar, CalendarTime,
+};
 
 /// A calendar that counts POSIX timestamps
 ///
@@ -18,75 +18,41 @@ const NANOS_IN_SEC: i128 = 1_000_000_000;
 pub struct Posix;
 
 /// A posix timestamp, precise to the nanosecond
-pub struct PosixTime {
-    posix_nanos: i128,
-}
+pub struct PosixTime(LeapSecondedTime<leap_seconds::SystemProvider>);
 
 // TODO: introduce a PosixDuration type with all the afferent Add/Sub(Assign) implementations
 
 impl Calendar for Posix {
     type Time = PosixTime;
 
-    fn write(&self, _t: &crate::Time) -> crate::Result<crate::WrittenTimeResult<Self::Time>> {
-        todo!()
+    fn write(&self, t: &crate::Time) -> crate::Result<crate::WrittenTimeResult<Self::Time>> {
+        <leap_seconds::SystemProvider as SystemLeapSecondProvider>::write(t)
+            .map(|r| r.map(PosixTime))
     }
 }
 
 impl CalendarTime for PosixTime {
     fn read(&self) -> crate::Result<crate::TimeResult> {
-        todo!()
+        <leap_seconds::SystemProvider as SystemLeapSecondProvider>::read(&self.0)
     }
 }
 
 impl Display for PosixTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}.{}",
-            self.posix_nanos / NANOS_IN_SEC,
-            (self.posix_nanos % NANOS_IN_SEC).abs(),
-        )
+        Display::fmt(&self.0, f)
     }
 }
 
 impl Debug for PosixTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        <Self as Display>::fmt(self, f)
+        Debug::fmt(&self.0, f)
     }
 }
 
-/// The errors that can arise while parsing a string to a posix timestamp
-#[derive(Clone, Debug)]
-pub enum ParseError {
-    /// An error occurred while trying to parse a presumed integer part of the timestamp
-    ParsingInt(core::num::ParseIntError),
-
-    /// The timestamp was out of range
-    Overflow,
-}
-
-// TODO: impl Error for FromStrError, once Error is in core
-
 impl FromStr for PosixTime {
-    type Err = ParseError;
+    type Err = leap_seconds::ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut items = s.split('.');
-        let seconds = items.next().unwrap(); // split always returns at least one result
-        let seconds = i128::from_str(seconds).map_err(ParseError::ParsingInt)?;
-        let nanos = match items.next() {
-            None | Some("") => 0,
-            Some(nanos) => i128::from_str(&nanos[..min(nanos.len(), 9)])
-                .map_err(ParseError::ParsingInt)?
-                .checked_mul(10_i128.pow((9 - nanos.len()) as u32))
-                .unwrap(), // 10 ** 9 is way inside i128 range
-        };
-        Ok(Self {
-            posix_nanos: seconds
-                .checked_mul(NANOS_IN_SEC)
-                .ok_or(ParseError::Overflow)?
-                .checked_add(nanos)
-                .ok_or(ParseError::Overflow)?,
-        })
+        Ok(Self(FromStr::from_str(s)?))
     }
 }
