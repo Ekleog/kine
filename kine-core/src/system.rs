@@ -47,10 +47,14 @@ impl System {
             .expect("Current time was before posix epoch");
         let pseudo_nanos = i128::try_from(duration.as_nanos())
             .expect("Overflow trying to retrieve the current time");
+        // No extra nanoseconds for the `std`-based implementation because it'd be impossible to know
+        let extra_nanos = 0;
+        // TODO: Introduce an implementation of `Time::now()` based on other clocks for platforms that
+        // can so this is not the best precision we could have.
         SystemTime(LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
             SYSTEM_PROVIDER.get_sigil().clone(),
             pseudo_nanos,
-            false,
+            extra_nanos,
         ))
     }
 }

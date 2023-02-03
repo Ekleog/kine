@@ -10,11 +10,16 @@ use super::LeapSecondSigil;
 
 const NANOS_IN_SEC: i128 = 1_000_000_000;
 
-/// A time relative
+/// A time on a time scale that needs to deal with leap seconds
+///
+/// It is represented by both `pseudo_nanos`,the number of nanoseconds between
+/// the POSIX epoch and the point in time according to this time scale, and
+/// `extra_nanos`, the number of (real) nanoseconds since we entered the current
+/// leap second and `pseudo_nanos` froze.
 pub struct LeapSecondedTime<Sig> {
     sigil: Sig,
     pseudo_nanos: i128,
-    in_leap_second: bool,
+    extra_nanos: u64,
 }
 
 impl<Sig> LeapSecondedTime<Sig> {
@@ -23,12 +28,12 @@ impl<Sig> LeapSecondedTime<Sig> {
     pub(crate) fn from_pseudo_nanos_since_posix_epoch(
         sigil: Sig,
         pseudo_nanos: i128,
-        in_leap_second: bool,
+        extra_nanos: u64,
     ) -> Self {
         Self {
             sigil,
             pseudo_nanos,
-            in_leap_second,
+            extra_nanos,
         }
     }
 
@@ -37,9 +42,11 @@ impl<Sig> LeapSecondedTime<Sig> {
         self.pseudo_nanos
     }
 
-    /// Return `true` iff this time is currently undergoing a leap second
-    pub fn in_leap_second(&self) -> bool {
-        self.in_leap_second
+    /// Return the number of nanoseconds that elapsed since the current leap second started
+    ///
+    /// Returns `0` if not currently in a leap second.
+    pub fn extra_nanos(&self) -> u64 {
+        self.extra_nanos
     }
 
     /// Return the sigil associated with this leap second type
@@ -58,7 +65,7 @@ impl<Sig: Display> Display for LeapSecondedTime<Sig> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{}.{}{}",
+            "{}.{:09}{}",
             self.pseudo_nanos / NANOS_IN_SEC,
             (self.pseudo_nanos % NANOS_IN_SEC).abs(),
             self.sigil,
@@ -69,7 +76,7 @@ impl<Sig: Display> Display for LeapSecondedTime<Sig> {
 impl<Sig: Display> Debug for LeapSecondedTime<Sig> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         <Self as Display>::fmt(self, f)?;
-        if self.in_leap_second {
+        if self.extra_nanos != 0 {
             f.write_str("(+1)")?;
         }
         Ok(())
@@ -119,9 +126,9 @@ impl<Sig: FromStr> FromStr for LeapSecondedTime<Sig> {
                 .ok_or(ParseError::Overflow)?
                 .checked_add(nanos)
                 .ok_or(ParseError::Overflow)?,
-            // Based only on a second number, it is impossible to differentiate between leap
-            // and non-leap
-            in_leap_second: false,
+            // Based only on a second (and nanos) number, it is impossible to know if we are in a
+            // leap second
+            extra_nanos: 0,
         })
     }
 }
