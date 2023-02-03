@@ -3,4 +3,8 @@ name = "kine-core"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+leap-seconds-provider-builtin = []
+
 [dependencies]
+cfg-if.workspace = true
