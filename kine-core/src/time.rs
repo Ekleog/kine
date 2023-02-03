@@ -18,6 +18,10 @@ impl Time {
     /// The posix epoch (1970-01-01T00:00:00 Gregorian UTC)
     pub const POSIX_EPOCH: Time = Time { nanos: 0 };
 
+    pub(crate) const fn from_posix_nanos(nanos: i128) -> Time {
+        Time { nanos }
+    }
+
     /// Return the current time
     pub fn now() -> Time {
         todo!()
@@ -37,15 +41,15 @@ impl Time {
     /// Offset by a duration, returning `None` on (however unlikely) overflow
     pub fn checked_add(&self, rhs: &Duration) -> Option<Time> {
         self.nanos
-            .checked_add(rhs.nanos)
-            .map(|nanos| Time { nanos })
+            .checked_add(rhs.nanos())
+            .map(Time::from_posix_nanos)
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow
     pub fn checked_sub(&self, rhs: &Duration) -> Option<Time> {
         self.nanos
-            .checked_sub(rhs.nanos)
-            .map(|nanos| Time { nanos })
+            .checked_sub(rhs.nanos())
+            .map(Time::from_posix_nanos)
     }
 
     /// Return the duration elapsed since the other point in time
@@ -58,9 +62,7 @@ impl Time {
     ///
     /// Returns `None` on the (however unlikely) overflow
     pub fn checked_duration_since(&self, rhs: &Time) -> Option<Duration> {
-        self.nanos
-            .checked_sub(rhs.nanos)
-            .map(|nanos| Duration { nanos })
+        self.nanos.checked_sub(rhs.nanos).map(Duration::from_nanos)
     }
 }
 

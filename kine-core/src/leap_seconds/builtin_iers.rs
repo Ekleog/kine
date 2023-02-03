@@ -1,4 +1,4 @@
-use crate::{Duration, Time};
+use crate::Time;
 
 use super::LeapSecondProvider;
 
