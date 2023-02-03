@@ -3,7 +3,7 @@ use core::{
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
-use crate::{Calendar, CalendarTime, Duration, TimeResult, WrittenTime, WrittenTimeResult};
+use crate::{Calendar, CalendarTime, Duration, System, TimeResult, WrittenTime, WrittenTimeResult};
 
 const NANOS_IN_SEC: i128 = 1_000_000_000;
 
@@ -13,6 +13,8 @@ const NANOS_IN_SEC: i128 = 1_000_000_000;
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Time {
     /// Offset with the POSIX epoch
+    ///
+    /// This is basically TAI - 10.
     nanos: i128,
 }
 
@@ -32,7 +34,10 @@ impl Time {
 
     /// Return the current time
     pub fn now() -> Time {
-        todo!()
+        System::now()
+            .read()
+            .expect("System time out of range")
+            .any_approximate()
     }
 
     pub fn read<Tim: CalendarTime>(t: Tim) -> crate::Result<TimeResult> {
