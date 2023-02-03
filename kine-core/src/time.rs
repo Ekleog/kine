@@ -5,6 +5,8 @@ use core::{
 
 use crate::{Calendar, CalendarTime, Duration, TimeResult, WrittenTime, WrittenTimeResult};
 
+const NANOS_IN_SEC: i128 = 1_000_000_000;
+
 /// One instant in real-life
 ///
 /// It can hold any time between roughly 10^22 years before and after posix epoch.
@@ -20,6 +22,12 @@ impl Time {
 
     pub(crate) const fn from_posix_nanos(nanos: i128) -> Time {
         Time { nanos }
+    }
+
+    pub(crate) const fn from_posix_secs(secs: i64) -> Time {
+        Time {
+            nanos: secs as i128 * NANOS_IN_SEC,
+        }
     }
 
     /// Return the current time
