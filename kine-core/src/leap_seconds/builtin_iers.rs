@@ -102,7 +102,7 @@ impl Calendar for BuiltinIers {
 
         // Handle the easy cases of time at a leap second or after the last leap second
         let id_after = match search {
-            Ok(i) => return Ok(WrittenTimeResult::One(LEAP_SECS[i].1)),
+            Ok(i) => return Ok(WrittenTimeResult::One(LEAP_SECS[i].1.clone())),
             Err(i) if i == LEAP_SECS.len() => {
                 let (base, leaped) = LEAP_SECS.last().unwrap();
                 let pseudo_nanos =
@@ -159,7 +159,9 @@ impl Default for BuiltinIers {
 }
 
 /// The sigil for the built-in IERS table
-#[derive(Clone, Copy, Debug)]
+// TODO: Make Copy again when clippy no longer complains about an unused clone
+// (ie. when SystemProvider will be a proper existential trait)
+#[derive(Clone, Debug)]
 pub struct BuiltinIersSigil;
 
 impl LeapSecondSigil for BuiltinIersSigil {

@@ -104,13 +104,13 @@ impl<Sig: FromStr> FromStr for LeapSecondedTime<Sig> {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let non_ascii_digit = |c: char| !c.is_ascii_digit();
-        let first_non_digit = s.find(non_ascii_digit).unwrap_or_else(|| s.len());
+        let first_non_digit = s.find(non_ascii_digit).unwrap_or(s.len());
         let (seconds, rest) = s.split_at(first_non_digit);
         let seconds = i128::from_str(seconds).map_err(ParseError::ParsingInt)?;
         let (nanos, rest) = match rest.strip_prefix('.') {
             None => (0, rest),
             Some(rest) => {
-                let first_non_digit = min(9, rest.find(non_ascii_digit).unwrap_or_else(|| s.len()));
+                let first_non_digit = min(9, rest.find(non_ascii_digit).unwrap_or(s.len()));
                 let (nanos, rest) = s.split_at(first_non_digit);
                 let nanos = i128::from_str(nanos)
                     .map_err(ParseError::ParsingInt)?
