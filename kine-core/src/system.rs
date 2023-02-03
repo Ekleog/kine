@@ -62,6 +62,7 @@ impl System {
 impl Calendar for System {
     type Time = SystemTime;
 
+    #[cfg(feature = "std")]
     fn now(&self) -> WrittenTimeResult<Self::Time> {
         WrittenTimeResult::One(Self::now())
     }

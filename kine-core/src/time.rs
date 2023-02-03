@@ -3,7 +3,7 @@ use core::{
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
-use crate::{Calendar, CalendarTime, Duration, System, TimeResult, WrittenTime, WrittenTimeResult};
+use crate::{Calendar, CalendarTime, Duration, TimeResult, WrittenTime, WrittenTimeResult};
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
 
@@ -35,8 +35,15 @@ impl Time {
     }
 
     /// Return the current time
+    ///
+    /// Note that this will panic in no-std environments if an alternative way of getting
+    /// the time is not known for the platform.
     pub fn now() -> Time {
-        System::now()
+        #[cfg(not(feature = "std"))]
+        panic!("Running on no-std with no known implementation of time-getting");
+
+        #[cfg(feature = "std")]
+        crate::System::now()
             .read()
             .expect("System time out of range")
             .any_approximate()
