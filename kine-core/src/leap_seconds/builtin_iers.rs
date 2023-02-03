@@ -1,6 +1,6 @@
-use crate::{Time, TimeResult, WrittenTimeResult};
+use crate::{Calendar, Time, TimeResult, WrittenTimeResult};
 
-use super::{LeapSecondedTime, SystemLeapSecondProvider};
+use super::{LeapSecondProvider, LeapSecondedTime};
 
 /// Name of the IERS Bulletin from which this list was taken (as a sigil)
 const BULLETIN: &str = " IERS-C65";
@@ -9,7 +9,7 @@ const BULLETIN: &str = " IERS-C65";
 /// Between items n (included) and n + 1 (excluded, or +infinity) here, the offset is
 /// IERS_LEAP_SECS[n].1
 static LEAP_SECS: &[(Time, i32)] = &[
-    (Time::from_posix_nanos(0), 10),
+    (Time::from_posix_secs(0), 10),
     (Time::from_posix_secs(15_724_800), 11),
     (Time::from_posix_secs(31_622_400), 12),
     (Time::from_posix_secs(63_158_400), 13),
@@ -43,19 +43,31 @@ static LEAP_SECS: &[(Time, i32)] = &[
 
 /// Leap second provider that uses the builtin, latest-at-the-time-of-last-`kine-core`-update
 /// IERS leap second table.
+#[derive(Clone, Copy)]
 pub struct BuiltinIers;
 
-impl SystemLeapSecondProvider for BuiltinIers {
-    fn read(_t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
+impl BuiltinIers {
+    // TODO: remove once it's possible to make it explicit that Default is implemented constly
+    pub(super) const fn const_default() -> BuiltinIers {
+        BuiltinIers
+    }
+}
+
+impl LeapSecondProvider for BuiltinIers {
+    fn read(&self, _t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
         todo!()
     }
 
-    fn write(_t: &Time) -> crate::Result<WrittenTimeResult<LeapSecondedTime<Self>>> {
-        todo!()
-    }
-
-    fn sigil() -> &'static str {
+    fn sigil(&self) -> &'static str {
         BULLETIN
+    }
+}
+
+impl Calendar for BuiltinIers {
+    type Time = LeapSecondedTime<Self>;
+
+    fn write(&self, _t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
+        todo!()
     }
 }
 

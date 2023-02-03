@@ -4,7 +4,7 @@ use core::{
 };
 
 use crate::{
-    leap_seconds::{self, LeapSecondedTime, SystemLeapSecondProvider},
+    leap_seconds::{self, LeapSecondProvider, LeapSecondedTime, SYSTEM_PROVIDER},
     Calendar, CalendarTime, TimeResult, WrittenTimeResult,
 };
 
@@ -24,7 +24,7 @@ use crate::{
 /// are welcome.
 pub struct System;
 
-/// A calendar that counts time like the current system clock
+/// A time clock that ticks like the current system clock
 ///
 /// On most platforms this will be either POSIX accounting or UTC-SLS accounting, depending
 /// on how NTP is set.
@@ -48,7 +48,7 @@ impl System {
         let pseudo_nanos = i128::try_from(duration.as_nanos())
             .expect("Overflow trying to retrieve the current time");
         SystemTime(LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
-            leap_seconds::SystemProvider::default(),
+            SYSTEM_PROVIDER.clone(),
             pseudo_nanos,
             false,
         ))
@@ -63,14 +63,13 @@ impl Calendar for System {
     }
 
     fn write(&self, t: &crate::Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
-        <leap_seconds::SystemProvider as SystemLeapSecondProvider>::write(t)
-            .map(|r| r.map(SystemTime))
+        SYSTEM_PROVIDER.write(t).map(|r| r.map(SystemTime))
     }
 }
 
 impl CalendarTime for SystemTime {
     fn read(&self) -> crate::Result<TimeResult> {
-        <leap_seconds::SystemProvider as SystemLeapSecondProvider>::read(&self.0)
+        SYSTEM_PROVIDER.read(&self.0)
     }
 }
 
