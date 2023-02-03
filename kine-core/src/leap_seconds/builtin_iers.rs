@@ -1,6 +1,6 @@
 use core::{fmt::Display, str::FromStr};
 
-use crate::{Calendar, Time, TimeResult, WrittenTimeResult};
+use crate::{Calendar, Duration, Error, Time, TimeResult, WrittenTimeResult};
 
 use super::{LeapSecondProvider, LeapSecondSigil, LeapSecondedTime};
 
@@ -98,7 +98,7 @@ impl Calendar for BuiltinIers {
     // TODO: fuzz this against read()
     fn write(&self, t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
         // Find the time in the leap seconds table
-        let search = LEAP_SECS.binary_search_by_key(t, |p| p.0);
+        let search = LEAP_SECS.binary_search_by_key(t, |(p, _)| *p);
 
         // Handle the easy cases of time at a leap second or after the last leap second
         let id_after = match search {
@@ -121,7 +121,7 @@ impl Calendar for BuiltinIers {
         // Handle the hard case of time that may be on a leap second
         // First, figure out what the nanoseconds _should be_ if there were no future leap second
         let should_be = match id_after {
-            0 => t.as_tai_nanos().ok_or(crate::Error::OutOfRange)? + OFFSET_BEFORE_FIRST_LEAP,
+            0 => t.as_tai_nanos().ok_or(Error::OutOfRange)? + OFFSET_BEFORE_FIRST_LEAP,
             i => {
                 let (base, leaped) = &LEAP_SECS[i - 1];
                 leaped.as_pseudo_nanos_since_posix_epoch() + (*t - *base).nanos()
@@ -163,8 +163,35 @@ impl Default for BuiltinIers {
 pub struct BuiltinIersSigil;
 
 impl LeapSecondSigil for BuiltinIersSigil {
-    fn read(&self, _t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
-        todo!()
+    fn read(&self, t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
+        // Find the interval in the leap seconds table (excluding extra time)
+        let search = LEAP_SECS
+            .binary_search_by_key(&t.as_pseudo_nanos_since_posix_epoch(), |(_, p)| {
+                p.as_pseudo_nanos_since_posix_epoch()
+            });
+
+        // Then, figure out the associated time, not counting leap seconds yet
+        let without_extra_nanos = match search {
+            Ok(i) => LEAP_SECS[i].0,
+            Err(0) => Time::from_tai_nanos(
+                t.as_pseudo_nanos_since_posix_epoch() - OFFSET_BEFORE_FIRST_LEAP,
+            )
+            .ok_or(Error::OutOfRange)?,
+            Err(i) => {
+                let (base, leaped) = &LEAP_SECS[i - 1];
+                base.checked_add(&Duration::from_nanos(
+                    t.as_pseudo_nanos_since_posix_epoch()
+                        - leaped.as_pseudo_nanos_since_posix_epoch(),
+                ))
+                .ok_or(Error::OutOfRange)?
+            }
+        };
+
+        // Finally, also count the extra nanoseconds
+        without_extra_nanos
+            .checked_add(&Duration::from_nanos(i128::from(t.extra_nanos())))
+            .ok_or(Error::OutOfRange)
+            .map(TimeResult::One)
     }
 }
 
