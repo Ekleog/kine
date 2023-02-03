@@ -3,13 +3,14 @@
 mod calendar;
 mod duration;
 mod results;
+mod system;
 mod time;
 
 pub use calendar::{Calendar, CalendarTime};
 pub use duration::Duration;
 pub mod leap_seconds;
-pub mod posix;
 pub use results::{Error, Result, TimeResult, WrittenTimeResult};
+pub use system::{System, SystemTime};
 pub use time::Time;
 
 /// A date and time as indicated by a calendar
