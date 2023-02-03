@@ -1,6 +1,8 @@
 mod builtin_iers;
 mod time;
 
+use core::{fmt::Display, str::FromStr};
+
 use crate::{Calendar, TimeResult};
 
 pub use builtin_iers::BuiltinIers;
@@ -33,11 +35,22 @@ cfg_if::cfg_if! {
 /// the things you can do with it will mostly change when `SystemProvider` will change.
 pub static SYSTEM_PROVIDER: SystemProvider = SystemProvider::const_default();
 
-/// A provider of leap seconds
-pub trait LeapSecondProvider: Sized + Calendar<Time = LeapSecondedTime<Self>> {
-    /// Read a time with leap seconds as a Time
-    fn read(&self, t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult>;
+/// Sigil for the system provider, convenience
+///
+/// Stability note: See SYSTEM_PROVIDER.
+pub type SystemProviderSigil = <SystemProvider as LeapSecondProvider>::Sigil;
 
-    /// Return the sigil this leap second provider can be identified with
-    fn sigil(&self) -> &str;
+/// A provider of leap seconds
+pub trait LeapSecondProvider: Calendar<Time = LeapSecondedTime<Self::Sigil>> {
+    /// The sigil type associated to this leap second provider
+    ///
+    /// This is basically metadata added to all `LeapSecondedTime`s.
+    type Sigil: LeapSecondSigil;
+
+    /// Return the (one) sigil this leap second provider can be identified with
+    fn get_sigil(&self) -> &Self::Sigil;
+}
+
+pub trait LeapSecondSigil: Clone + Display + FromStr {
+    fn read(&self, t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult>;
 }

@@ -31,7 +31,7 @@ pub struct System;
 ///
 /// Note that as this does not know of a calendar, its string functions will be giving out
 /// raw numbers that may not be user-friendly.
-pub struct SystemTime(LeapSecondedTime<leap_seconds::SystemProvider>);
+pub struct SystemTime(LeapSecondedTime<leap_seconds::SystemProviderSigil>);
 
 // TODO: introduce a SystemDuration type with all the afferent Add/Sub(Assign) implementations?
 
@@ -48,7 +48,7 @@ impl System {
         let pseudo_nanos = i128::try_from(duration.as_nanos())
             .expect("Overflow trying to retrieve the current time");
         SystemTime(LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
-            SYSTEM_PROVIDER.clone(),
+            SYSTEM_PROVIDER.get_sigil().clone(),
             pseudo_nanos,
             false,
         ))
@@ -69,7 +69,7 @@ impl Calendar for System {
 
 impl CalendarTime for SystemTime {
     fn read(&self) -> crate::Result<TimeResult> {
-        SYSTEM_PROVIDER.read(&self.0)
+        self.0.read()
     }
 }
 
@@ -86,7 +86,9 @@ impl Debug for SystemTime {
 }
 
 impl FromStr for SystemTime {
-    type Err = leap_seconds::ParseError;
+    type Err = leap_seconds::ParseError<
+        <<leap_seconds::SystemProvider as LeapSecondProvider>::Sigil as FromStr>::Err,
+    >;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(FromStr::from_str(s)?))

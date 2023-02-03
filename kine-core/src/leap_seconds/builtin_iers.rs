@@ -1,6 +1,8 @@
+use core::{fmt::Display, str::FromStr};
+
 use crate::{Calendar, Time, TimeResult, WrittenTimeResult};
 
-use super::{LeapSecondProvider, LeapSecondedTime};
+use super::{LeapSecondProvider, LeapSecondSigil, LeapSecondedTime};
 
 /// Name of the IERS Bulletin from which this list was taken (as a sigil)
 const BULLETIN: &str = " IERS-C65";
@@ -54,17 +56,15 @@ impl BuiltinIers {
 }
 
 impl LeapSecondProvider for BuiltinIers {
-    fn read(&self, _t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
-        todo!()
-    }
+    type Sigil = BuiltinIersSigil;
 
-    fn sigil(&self) -> &'static str {
-        BULLETIN
+    fn get_sigil(&self) -> &BuiltinIersSigil {
+        &BuiltinIersSigil
     }
 }
 
 impl Calendar for BuiltinIers {
-    type Time = LeapSecondedTime<Self>;
+    type Time = LeapSecondedTime<BuiltinIersSigil>;
 
     fn write(&self, _t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
         todo!()
@@ -74,5 +74,41 @@ impl Calendar for BuiltinIers {
 impl Default for BuiltinIers {
     fn default() -> Self {
         Self
+    }
+}
+
+/// The sigil for the built-in IERS table
+#[derive(Clone, Copy, Debug)]
+pub struct BuiltinIersSigil;
+
+impl LeapSecondSigil for BuiltinIersSigil {
+    fn read(&self, _t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
+        todo!()
+    }
+}
+
+impl Display for BuiltinIersSigil {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str(BULLETIN)
+    }
+}
+
+/// The passed sigil was not one of the valid ones
+///
+/// Valid ones are "", " IERS" and " IERS-C??" where "??" is the number of the bulletin
+/// that is currently being built-in.
+#[derive(Clone, Copy, Debug)]
+pub struct InvalidSigil;
+
+// TODO: derive Error for InvalidSigil
+
+impl FromStr for BuiltinIersSigil {
+    type Err = InvalidSigil;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "" | " IERS" | BULLETIN => Ok(BuiltinIersSigil),
+            _ => Err(InvalidSigil),
+        }
     }
 }
