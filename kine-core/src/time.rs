@@ -22,14 +22,16 @@ impl Time {
     /// The posix epoch (1970-01-01T00:00:00 Gregorian UTC)
     pub const POSIX_EPOCH: Time = Time { nanos: 0 };
 
-    pub(crate) const fn from_posix_nanos(nanos: i128) -> Time {
-        Time { nanos }
+    pub(crate) const fn from_tai_nanos(nanos: i128) -> Option<Time> {
+        Time::from_nanos_since_posix_epoch(nanos).checked_sub(&Duration::from_secs(10))
     }
 
-    pub(crate) const fn from_posix_secs(secs: i64) -> Time {
-        Time {
-            nanos: secs as i128 * NANOS_IN_SECS,
-        }
+    pub(crate) const fn as_tai_nanos(&self) -> Option<i128> {
+        self.nanos.checked_add(10 * NANOS_IN_SECS)
+    }
+
+    pub(crate) const fn from_nanos_since_posix_epoch(nanos: i128) -> Time {
+        Time { nanos }
     }
 
     /// Return the current time
@@ -52,17 +54,21 @@ impl Time {
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow
-    pub fn checked_add(&self, rhs: &Duration) -> Option<Time> {
-        self.nanos
-            .checked_add(rhs.nanos())
-            .map(Time::from_posix_nanos)
+    pub const fn checked_add(&self, rhs: &Duration) -> Option<Time> {
+        // TODO: replace with .map() once const_option_ext is stable
+        match self.nanos.checked_add(rhs.nanos()) {
+            Some(n) => Some(Time::from_nanos_since_posix_epoch(n)),
+            None => None,
+        }
     }
 
     /// Offset by a duration, returning `None` on (however unlikely) overflow
-    pub fn checked_sub(&self, rhs: &Duration) -> Option<Time> {
-        self.nanos
-            .checked_sub(rhs.nanos())
-            .map(Time::from_posix_nanos)
+    pub const fn checked_sub(&self, rhs: &Duration) -> Option<Time> {
+        // TODO: replace with .map() once const_option_ext is stable
+        match self.nanos.checked_sub(rhs.nanos()) {
+            Some(n) => Some(Time::from_nanos_since_posix_epoch(n)),
+            None => None,
+        }
     }
 
     /// Return the duration elapsed since the other point in time

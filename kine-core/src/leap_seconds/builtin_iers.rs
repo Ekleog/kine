@@ -13,7 +13,11 @@ macro_rules! make_table {
     ( $( ( $posix:expr, $offset:expr ), )* ) => {
         [ $(
             (
-                Time::from_posix_secs($posix + $offset),
+                // TODO: replace with .unwrap() when const_option_ext is stable
+                match Time::from_tai_nanos(($posix + $offset) * NANOS_IN_SECS) {
+                    Some(t) => t,
+                    None => panic!("Ill-formed leap second table"),
+                },
                 LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
                     BuiltinIersSigil,
                     $posix * NANOS_IN_SECS,
@@ -24,13 +28,18 @@ macro_rules! make_table {
     }
 }
 
+/// LeapSecondedTime::as_pseudo_nanos_from_posix_epoch() - Time::as_tai_nanos() before the
+/// first leap second
+const OFFSET_BEFORE_FIRST_LEAP: i128 = 0;
+
 /// List of leap seconds. Between -infinity and the first item here, the two are assumed to
-/// be the same. Between item N (included) and N + 1 (excluded, or +infinity), the two times
-/// advance linearly, in sync.
+/// be the same. At item N, `LeapSecondedTime` jumps to the value specified in `Time`.
+/// Between item N (included) and N + 1 (excluded, or +infinity), the two times advance
+/// linearly, in sync.
 ///
 /// A leap second happens when the offset between the elements of item N + 1 and N are not
 /// the same.
-static LEAP_SECS: &[(Time, LeapSecondedTime<BuiltinIersSigil>)] = &make_table![
+static LEAP_SECS: [(Time, LeapSecondedTime<BuiltinIersSigil>); 28] = make_table![
     (0, 10),
     (15_724_800, 11),
     (31_622_400, 12),
@@ -86,8 +95,60 @@ impl LeapSecondProvider for BuiltinIers {
 impl Calendar for BuiltinIers {
     type Time = LeapSecondedTime<BuiltinIersSigil>;
 
-    fn write(&self, _t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
-        todo!()
+    // TODO: fuzz this against read()
+    fn write(&self, t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
+        // Find the time in the leap seconds table
+        let search = LEAP_SECS.binary_search_by_key(t, |p| p.0);
+
+        // Handle the easy cases of time at a leap second or after the last leap second
+        let id_after = match search {
+            Ok(i) => return Ok(WrittenTimeResult::One(LEAP_SECS[i].1)),
+            Err(i) if i == LEAP_SECS.len() => {
+                let (base, leaped) = LEAP_SECS.last().unwrap();
+                let pseudo_nanos =
+                    leaped.as_pseudo_nanos_since_posix_epoch() + (*t - *base).nanos(); // TODO: remove derefs once Add correctly impl'd
+                return Ok(WrittenTimeResult::One(
+                    LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+                        BuiltinIersSigil,
+                        pseudo_nanos,
+                        0, // No extra nanos after last leap second
+                    ),
+                ));
+            }
+            Err(i) => i,
+        };
+
+        // Handle the hard case of time that may be on a leap second
+        // First, figure out what the nanoseconds _should be_ if there were no future leap second
+        let should_be = match id_after {
+            0 => t.as_tai_nanos().ok_or(crate::Error::OutOfRange)? + OFFSET_BEFORE_FIRST_LEAP,
+            i => {
+                let (base, leaped) = &LEAP_SECS[i - 1];
+                leaped.as_pseudo_nanos_since_posix_epoch() + (*t - *base).nanos()
+            }
+        };
+
+        // Then, figure out whether the "should be" actually is, or is in the middle of a leap
+        let (_next, next_leaped) = &LEAP_SECS[id_after];
+        let next_leaped_nanos = next_leaped.as_pseudo_nanos_since_posix_epoch();
+        if should_be >= next_leaped_nanos {
+            Ok(WrittenTimeResult::One(
+                LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+                    BuiltinIersSigil,
+                    next_leaped_nanos - 1,
+                    u64::try_from(should_be - next_leaped_nanos + 1)
+                        .expect("ill-formed IERS table"),
+                ),
+            ))
+        } else {
+            Ok(WrittenTimeResult::One(
+                LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+                    BuiltinIersSigil,
+                    should_be,
+                    0,
+                ),
+            ))
+        }
     }
 }
 

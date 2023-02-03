@@ -16,6 +16,7 @@ const NANOS_IN_SECS: i128 = 1_000_000_000;
 /// the POSIX epoch and the point in time according to this time scale, and
 /// `extra_nanos`, the number of (real) nanoseconds since we entered the current
 /// leap second and `pseudo_nanos` froze.
+#[derive(Copy, Clone)]
 pub struct LeapSecondedTime<Sig> {
     sigil: Sig,
     pseudo_nanos: i128,
