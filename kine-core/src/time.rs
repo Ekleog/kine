@@ -5,7 +5,7 @@ use core::{
 
 use crate::{Calendar, CalendarTime, Duration, System, TimeResult, WrittenTime, WrittenTimeResult};
 
-const NANOS_IN_SEC: i128 = 1_000_000_000;
+const NANOS_IN_SECS: i128 = 1_000_000_000;
 
 /// One instant in real-life
 ///
@@ -28,7 +28,7 @@ impl Time {
 
     pub(crate) const fn from_posix_secs(secs: i64) -> Time {
         Time {
-            nanos: secs as i128 * NANOS_IN_SEC,
+            nanos: secs as i128 * NANOS_IN_SECS,
         }
     }
 
@@ -121,13 +121,11 @@ impl Sub<Time> for Time {
 
 impl Debug for Time {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        const NANOS_IN_SEC: i128 = 1_000_000_000;
-
         write!(
             f,
             "{}.{}",
-            self.nanos / NANOS_IN_SEC,
-            (self.nanos % NANOS_IN_SEC).abs(),
+            self.nanos / NANOS_IN_SECS,
+            (self.nanos % NANOS_IN_SECS).abs(),
         )
     }
 }

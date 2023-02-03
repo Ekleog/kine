@@ -8,7 +8,7 @@ use crate::CalendarTime;
 
 use super::LeapSecondSigil;
 
-const NANOS_IN_SEC: i128 = 1_000_000_000;
+const NANOS_IN_SECS: i128 = 1_000_000_000;
 
 /// A time on a time scale that needs to deal with leap seconds
 ///
@@ -25,7 +25,7 @@ pub struct LeapSecondedTime<Sig> {
 impl<Sig> LeapSecondedTime<Sig> {
     /// Build a `LeapSecondedTime` from the number of pseudo-nanoseconds between this time
     /// and the POSIX epoch
-    pub(crate) fn from_pseudo_nanos_since_posix_epoch(
+    pub const fn from_pseudo_nanos_since_posix_epoch(
         sigil: Sig,
         pseudo_nanos: i128,
         extra_nanos: u64,
@@ -66,8 +66,8 @@ impl<Sig: Display> Display for LeapSecondedTime<Sig> {
         write!(
             f,
             "{}.{:09}{}",
-            self.pseudo_nanos / NANOS_IN_SEC,
-            (self.pseudo_nanos % NANOS_IN_SEC).abs(),
+            self.pseudo_nanos / NANOS_IN_SECS,
+            (self.pseudo_nanos % NANOS_IN_SECS).abs(),
             self.sigil,
         )
     }
@@ -122,7 +122,7 @@ impl<Sig: FromStr> FromStr for LeapSecondedTime<Sig> {
         Ok(Self {
             sigil,
             pseudo_nanos: seconds
-                .checked_mul(NANOS_IN_SEC)
+                .checked_mul(NANOS_IN_SECS)
                 .ok_or(ParseError::Overflow)?
                 .checked_add(nanos)
                 .ok_or(ParseError::Overflow)?,

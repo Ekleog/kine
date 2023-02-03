@@ -7,38 +7,58 @@ use super::{LeapSecondProvider, LeapSecondSigil, LeapSecondedTime};
 /// Name of the IERS Bulletin from which this list was taken (as a sigil)
 const BULLETIN: &str = " IERS-C65";
 
-/// List of leap seconds. Between -infinity and the first item here, the offset is 0.
-/// Between items n (included) and n + 1 (excluded, or +infinity) here, the offset is
-/// IERS_LEAP_SECS[n].1
-static LEAP_SECS: &[(Time, i32)] = &[
-    (Time::from_posix_secs(0), 10),
-    (Time::from_posix_secs(15_724_800), 11),
-    (Time::from_posix_secs(31_622_400), 12),
-    (Time::from_posix_secs(63_158_400), 13),
-    (Time::from_posix_secs(94_694_400), 14),
-    (Time::from_posix_secs(126_230_400), 15),
-    (Time::from_posix_secs(157_852_800), 16),
-    (Time::from_posix_secs(189_388_800), 17),
-    (Time::from_posix_secs(220_924_800), 18),
-    (Time::from_posix_secs(252_460_800), 19),
-    (Time::from_posix_secs(299_721_600), 20),
-    (Time::from_posix_secs(331_257_600), 21),
-    (Time::from_posix_secs(362_793_600), 22),
-    (Time::from_posix_secs(425_952_000), 23),
-    (Time::from_posix_secs(504_921_600), 24),
-    (Time::from_posix_secs(568_080_000), 25),
-    (Time::from_posix_secs(599_616_000), 26),
-    (Time::from_posix_secs(646_876_800), 27),
-    (Time::from_posix_secs(678_412_800), 28),
-    (Time::from_posix_secs(709_948_800), 29),
-    (Time::from_posix_secs(757_382_400), 30),
-    (Time::from_posix_secs(804_643_200), 31),
-    (Time::from_posix_secs(852_076_800), 32),
-    (Time::from_posix_secs(1_073_001_600), 33),
-    (Time::from_posix_secs(1_167_696_000), 34),
-    (Time::from_posix_secs(1_278_028_800), 35),
-    (Time::from_posix_secs(1_372_636_800), 36),
-    (Time::from_posix_secs(1_420_156_800), 37),
+const NANOS_IN_SECS: i128 = 1_000_000_000;
+
+macro_rules! make_table {
+    ( $( ( $posix:expr, $offset:expr ), )* ) => {
+        [ $(
+            (
+                Time::from_posix_secs($posix + $offset),
+                LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+                    BuiltinIersSigil,
+                    $posix * NANOS_IN_SECS,
+                    0,
+                )
+            )
+        ),* ]
+    }
+}
+
+/// List of leap seconds. Between -infinity and the first item here, the two are assumed to
+/// be the same. Between item N (included) and N + 1 (excluded, or +infinity), the two times
+/// advance linearly, in sync.
+///
+/// A leap second happens when the offset between the elements of item N + 1 and N are not
+/// the same.
+static LEAP_SECS: &[(Time, LeapSecondedTime<BuiltinIersSigil>)] = &make_table![
+    (0, 10),
+    (15_724_800, 11),
+    (31_622_400, 12),
+    (63_158_400, 13),
+    (94_694_400, 14),
+    (126_230_400, 15),
+    (157_852_800, 16),
+    (189_388_800, 17),
+    (220_924_800, 18),
+    (252_460_800, 19),
+    (299_721_600, 20),
+    (331_257_600, 21),
+    (362_793_600, 22),
+    (425_952_000, 23),
+    (504_921_600, 24),
+    (568_080_000, 25),
+    (599_616_000, 26),
+    (646_876_800, 27),
+    (678_412_800, 28),
+    (709_948_800, 29),
+    (757_382_400, 30),
+    (804_643_200, 31),
+    (852_076_800, 32),
+    (1_073_001_600, 33),
+    (1_167_696_000, 34),
+    (1_278_028_800, 35),
+    (1_372_636_800, 36),
+    (1_420_156_800, 37),
 ];
 // TODO: add a(n impure) test checking that this is up-to-date with the latest
 // downloaded file
