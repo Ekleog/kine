@@ -220,3 +220,47 @@ impl FromStr for BuiltinIersSigil {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{Calendar, CalendarTime, Error, Time, TimeResult, WrittenTimeResult};
+
+    use super::{BuiltinIers, NANOS_IN_SECS};
+
+    #[test]
+    fn leap_conversion_round_trip() {
+        bolero::check!().with_type::<i128>().for_each(|&t| {
+            let assert_out_of_range = |t| {
+                assert!(
+                    t < i128::MIN + 15 * NANOS_IN_SECS || t > i128::MAX - 15 * NANOS_IN_SECS,
+                    "Returned out of range for time {t} that is not close to the ends of the range"
+                )
+            };
+            let time = Time::from_nanos_since_posix_epoch(t);
+            let leaped = match BuiltinIers.write(&time) {
+                Err(Error::OutOfRange) => {
+                    assert_out_of_range(t);
+                    return;
+                }
+                Ok(WrittenTimeResult::Many(r)) => {
+                    panic!("Converting time to leaped time returned multiple results, like {r:?}")
+                }
+                Ok(WrittenTimeResult::One(t)) => t,
+            };
+            let time_bis = match leaped.read() {
+                Err(Error::OutOfRange) => {
+                    assert_out_of_range(t);
+                    return;
+                }
+                Ok(TimeResult::One(t)) => t,
+                Ok(t) => panic!(
+                    "Converting leaped time to time did not return exactly one result: {t:?}"
+                ),
+            };
+            assert_eq!(
+                time, time_bis,
+                "Round-tripping through leaped time lost information"
+            );
+        })
+    }
+}

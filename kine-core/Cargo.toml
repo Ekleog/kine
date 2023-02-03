@@ -9,3 +9,6 @@ std = []
 
 [dependencies]
 cfg-if.workspace = true
+
+[dev-dependencies]
+bolero.workspace = true
