@@ -9,7 +9,7 @@ pub use builtin_iers::BuiltinIers;
 pub use time::{LeapSecondedTime, ParseError};
 
 cfg_if::cfg_if! {
-    if #[cfg(feature = "leap-seconds-provider-builtin")] {
+    if #[cfg(feature = "leap-seconds-provider-builtin-iers")] {
         /// Leap second provider for the system clock
         ///
         /// If this is not set properly then all `Time`s (and dependent calculations) will be off
