@@ -1,5 +1,5 @@
-use std::{
-    fmt::Debug,
+use core::{
+    fmt::{self, Debug},
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
@@ -105,7 +105,7 @@ impl Sub<Time> for Time {
 // TODO: also introduce all the & variants
 
 impl Debug for Time {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         const NANOS_IN_SEC: i128 = 1_000_000_000;
 
         write!(

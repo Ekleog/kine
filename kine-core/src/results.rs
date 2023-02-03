@@ -1,5 +1,8 @@
 use crate::Time;
 
+// TODO: consider removing WrittenTimeResult altogether as I don't think it's
+// actually useful compared to just always returning one written time
+
 /// The result of trying to write a time in a calendar system
 ///
 /// Note that it is assumed that a calendar will return [`Error::OutOfRange`] if
@@ -8,10 +11,17 @@ use crate::Time;
 #[derive(Clone, Debug)]
 pub enum WrittenTimeResult<T> {
     /// There was exactly one way of writing the time
+    ///
+    /// This is the "normal path."
     One(T),
 
-    /// There were many ways of writing the time
-    Many(Vec<T>),
+    /// There were many ways of writing the time (more than two)
+    ///
+    /// This should not happen with well-formed calendars (any real-world instant
+    /// should have a unique way of writing it), but it can theoretically happen
+    /// in some calendars. It will probably never actually happen in practice. Only
+    /// one example way of writing the time is provided in this case.
+    Many(T),
 }
 
 impl<T> WrittenTimeResult<T> {
@@ -22,15 +32,15 @@ impl<T> WrittenTimeResult<T> {
     pub fn any(self) -> T {
         match self {
             WrittenTimeResult::One(t) => t,
-            WrittenTimeResult::Many(v) => v.into_iter().next().unwrap(),
+            WrittenTimeResult::Many(t) => t,
         }
     }
 
     /// Maps this function on all instances of T in this result
-    pub fn map<U>(self, mut f: impl FnMut(T) -> U) -> WrittenTimeResult<U> {
+    pub fn map<U>(self, f: impl FnOnce(T) -> U) -> WrittenTimeResult<U> {
         match self {
             WrittenTimeResult::One(t) => WrittenTimeResult::One(f(t)),
-            WrittenTimeResult::Many(v) => WrittenTimeResult::Many(v.into_iter().map(f).collect()),
+            WrittenTimeResult::Many(t) => WrittenTimeResult::Many(f(t)),
         }
     }
 }
@@ -39,10 +49,23 @@ impl<T> WrittenTimeResult<T> {
 #[derive(Clone, Debug)]
 pub enum TimeResult {
     /// The written time matches exactly one real-world time
+    ///
+    /// This is the "normal path."
     One(Time),
 
+    /// The written time matches two real-world times
+    ///
+    /// This happens relatively often, eg. when a timezone goes back in time.
+    Two(Time, Time),
+
     /// The written time matches many real-world times
-    Many(Vec<Time>),
+    ///
+    /// This should happen very rarely, but can theoretically happen, eg. if a backwards
+    /// leap second happens while a timezone is going back in time then there would be three
+    /// possible real-world times matching this Time. Given how rare this should be (basically,
+    /// probably never actually happen until all programs using this crate are long forgotten),
+    /// in this scenario a single example value is returned.
+    Many(Time),
 
     /// The written time never actually happened
     ///
@@ -58,20 +81,23 @@ impl TimeResult {
     /// of what it would have been if it did actually exist.
     pub fn any_approximate(self) -> Time {
         match self {
-            TimeResult::One(t) => t,
-            TimeResult::Many(v) => v.into_iter().next().unwrap(),
-            TimeResult::DidNotExist(t, _) => t,
+            TimeResult::One(t)
+            | TimeResult::Two(t, _)
+            | TimeResult::Many(t)
+            | TimeResult::DidNotExist(t, _) => t,
         }
     }
 }
 
 /// A specialized Result type for `kine`.
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, Error>;
 
 /// Represents all the ways a function can fail within `kine`.
-#[derive(Clone, Copy, Debug, thiserror::Error)]
+#[derive(Clone, Copy, Debug)]
 pub enum Error {
     /// Overflowed the allowed range for the return type
-    #[error("Overflowed the allowed range for the return type")]
     OutOfRange,
 }
+
+// TODO: implement Error once error_in_core is stable
+// impl core::error::Error for Error {}

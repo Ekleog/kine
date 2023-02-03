@@ -7,4 +7,3 @@ members = [
 
 [workspace.dependencies]
 kine-core = { path = "./kine-core" }
-thiserror = "1.0"

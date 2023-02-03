@@ -1,5 +1,5 @@
-use std::{
-    fmt::{Debug, Display},
+use core::{
+    fmt::{self, Debug, Display},
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
@@ -154,13 +154,13 @@ impl Default for Duration {
 }
 
 impl Debug for Duration {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         <Duration as Display>::fmt(self, f)
     }
 }
 
 impl Display for Duration {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.nanos % NANOS_IN_HOURS == 0 {
             write!(f, "{}h", self.nanos / NANOS_IN_HOURS)
         } else if self.nanos % NANOS_IN_MINS == 0 {

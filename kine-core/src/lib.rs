@@ -1,3 +1,5 @@
+#![no_std]
+
 mod calendar;
 mod duration;
 mod results;
