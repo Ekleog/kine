@@ -29,6 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
-      - run: nix-shell --pure --run 'cargo build --all --features $CARGO_FEATURES'
-      - run: nix-shell --pure --run 'cargo test --all --features $CARGO_FEATURES'
-      - run: nix-shell --pure --run 'cargo doc --all --features $CARGO_FEATURES'
+      - run: nix-shell --pure --run "cargo build --all --features $CARGO_FEATURES"
+      - run: nix-shell --pure --run "cargo test --all --features $CARGO_FEATURES"
+      - run: nix-shell --pure --run "cargo doc --all --features $CARGO_FEATURES"
