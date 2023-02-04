@@ -95,7 +95,6 @@ impl LeapSecondProvider for BuiltinIers {
 impl Calendar for BuiltinIers {
     type Time = LeapSecondedTime<BuiltinIersSigil>;
 
-    // TODO: fuzz this against read()
     fn write(&self, t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
         // Find the time in the leap seconds table
         let search = LEAP_SECS.binary_search_by_key(t, |(p, _)| *p);
