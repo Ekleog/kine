@@ -155,7 +155,7 @@ impl Default for BuiltinIers {
 
 /// The sigil for the built-in IERS table
 // TODO: Make Copy again when clippy no longer complains about an unused clone
-// (ie. when SystemProvider will be a proper existential trait)
+// (ie. when System will be a proper existential trait)
 #[derive(Clone, Debug)]
 pub struct BuiltinIersSigil;
 

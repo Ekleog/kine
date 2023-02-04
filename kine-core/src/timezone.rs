@@ -12,12 +12,12 @@ const NANOS_IN_SECS: i128 = 1_000_000_000;
 ///
 /// Time zones usually offset the visible time by some amount, and do not
 pub trait TimeZone: Calendar<Time = OffsetTime<Self::Sigil>> {
-    /// The sigil type associated to this leap second provider
+    /// The sigil type associated to this time zone
     ///
-    /// This is basically metadata added to all `LeapSecondedTime`s.
+    /// This is basically metadata added to all `OffsetTime`s.
     type Sigil: Sigil;
 
-    /// Return the (one of the) sigil(s) this leap second provider can be identified with
+    /// Return the (one of the) sigil(s) this time zone provider can be identified with
     fn get_sigil(&self) -> &Self::Sigil;
 }
 

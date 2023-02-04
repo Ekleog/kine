@@ -4,8 +4,8 @@ use core::{
 };
 
 use crate::{
-    providers::{SystemProvider, SystemProviderSigil, SYSTEM_PROVIDER},
-    timezone, Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult,
+    providers, timezone, Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone,
+    WrittenTimeResult,
 };
 
 /// A calendar that counts time like the current system clock
@@ -31,7 +31,7 @@ pub struct System;
 ///
 /// Note that as this does not know of a calendar, its string functions will be giving out
 /// raw numbers that may not be user-friendly.
-pub struct SystemTime(OffsetTime<SystemProviderSigil>);
+pub struct SystemTime(OffsetTime<providers::SystemSigil>);
 
 // TODO: introduce a SystemDuration type with all the afferent Add/Sub(Assign) implementations?
 
@@ -52,7 +52,7 @@ impl System {
         // TODO: Introduce an implementation of `Time::now()` based on other clocks for platforms that
         // can so this is not the best precision we could have.
         SystemTime(OffsetTime::from_pseudo_nanos_since_posix_epoch(
-            SYSTEM_PROVIDER.get_sigil().clone(),
+            providers::SYSTEM.get_sigil().clone(),
             pseudo_nanos,
             extra_nanos,
         ))
@@ -68,7 +68,7 @@ impl Calendar for System {
     }
 
     fn write(&self, t: &crate::Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
-        SYSTEM_PROVIDER.write(t).map(|r| r.map(SystemTime))
+        providers::SYSTEM.write(t).map(|r| r.map(SystemTime))
     }
 }
 
@@ -91,7 +91,7 @@ impl Debug for SystemTime {
 }
 
 impl FromStr for SystemTime {
-    type Err = timezone::ParseError<<<SystemProvider as TimeZone>::Sigil as FromStr>::Err>;
+    type Err = timezone::ParseError<<<providers::System as TimeZone>::Sigil as FromStr>::Err>;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(FromStr::from_str(s)?))

@@ -10,7 +10,7 @@ jobs:
     name: Cargo Fmt, Clippy and Udeps
     runs-on: ubuntu-latest
     env:
-      CARGO_FEATURES: leap-seconds-provider-builtin-iers,std,
+      CARGO_FEATURES: tz-system-provider-builtin-iers,std,
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
@@ -24,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        feat-leap-seconds-provider: ["leap-seconds-provider-builtin-iers,"]
+        feat-tz-system-provider: ["tz-system-provider-builtin-iers,"]
         feat-std: ["std,", ""]
     env:
-      CARGO_FEATURES: ${{ matrix.feat-leap-seconds-provider }}${{ matrix.feat-std }}
+      CARGO_FEATURES: ${{ matrix.feat-tz-system-provider }}${{ matrix.feat-std }}
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
