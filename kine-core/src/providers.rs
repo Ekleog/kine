@@ -13,7 +13,7 @@ cfg_if::cfg_if! {
         /// And once extern existential types get done and stable, the various feature flags
         /// will be replaced with making this existential type extern (but will be kept there
         /// for backwards compatibility until the next major release)
-        pub type System = Box<dyn Default + Clone + TimeZone>;
+        pub type System = BuiltinIers;
 
     } else if #[cfg(feature = "tz-system-provider-builtin-iers")] {
         pub type System = BuiltinIers;
