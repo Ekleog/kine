@@ -1,11 +1,7 @@
-use core::{
-    fmt::{self, Debug, Display},
-    str::FromStr,
-};
+use core::fmt::{self, Debug};
 
 use crate::{
-    providers, timezone, Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone,
-    WrittenTimeResult,
+    providers, Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult,
 };
 
 /// A calendar that counts time like the current system clock
@@ -95,22 +91,8 @@ impl CalendarTime for SystemTime {
     }
 }
 
-impl Display for SystemTime {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Display::fmt(&self.0, f)
-    }
-}
-
 impl Debug for SystemTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Debug::fmt(&self.0, f)
-    }
-}
-
-impl FromStr for SystemTime {
-    type Err = timezone::ParseError<<<providers::System as TimeZone>::Sigil as FromStr>::Err>;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(FromStr::from_str(s)?))
     }
 }

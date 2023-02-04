@@ -1,8 +1,3 @@
-use core::{
-    fmt::{Debug, Display},
-    str::FromStr,
-};
-
 use crate::{Time, TimeResult, WrittenTimeResult};
 
 /// A calendar system, including timezone if need be
@@ -39,15 +34,10 @@ pub trait Calendar {
         self.write(&Time::now())
             .expect("Trying to write out-of-range time")
     }
-
-    /// Parse this written time from the default human-readable format
-    fn from_str(s: &str) -> Result<Self::Time, <Self::Time as FromStr>::Err> {
-        Self::Time::from_str(s)
-    }
 }
 
 /// Time as represented by a calendar
-pub trait CalendarTime: Debug + Display + FromStr {
+pub trait CalendarTime {
     /// Find the possible times this written time could be about
     fn read(&self) -> crate::Result<TimeResult>;
 }
