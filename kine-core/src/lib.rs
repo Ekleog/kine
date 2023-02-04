@@ -9,6 +9,7 @@ mod time;
 pub use calendar::{Calendar, CalendarTime};
 pub use duration::Duration;
 pub mod leap_seconds;
+pub mod providers;
 pub use results::{Error, Result, TimeResult, WrittenTimeResult};
 pub use system::{System, SystemTime};
 pub use time::Time;

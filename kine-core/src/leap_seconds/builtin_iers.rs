@@ -79,7 +79,7 @@ pub struct BuiltinIers;
 
 impl BuiltinIers {
     // TODO: remove once it's possible to make it explicit that Default is implemented constly
-    pub(super) const fn const_default() -> BuiltinIers {
+    pub(crate) const fn const_default() -> BuiltinIers {
         BuiltinIers
     }
 }

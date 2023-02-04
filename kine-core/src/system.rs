@@ -4,7 +4,7 @@ use core::{
 };
 
 use crate::{
-    leap_seconds::{SystemProvider, SystemProviderSigil, SYSTEM_PROVIDER},
+    providers::{SystemProvider, SystemProviderSigil, SYSTEM_PROVIDER},
     timezone, Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult,
 };
 
