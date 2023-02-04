@@ -1,5 +1,7 @@
 {
     "rust-analyzer.cargo.features": [
-        "std", "tz-system-provider-builtin-iers"
+        "std",
+        "tz-utc-provider-builtin-iers",
+        "tz-system-provider-builtin-iers"
     ]
 }

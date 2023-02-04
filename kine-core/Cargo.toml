@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 tz-system-provider-builtin-iers = []
+tz-utc-provider-builtin-iers = []
 std = []
 
 [dependencies]
