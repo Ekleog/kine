@@ -4,8 +4,8 @@ use core::{
 };
 
 use crate::{
-    leap_seconds::{self, LeapSecondProvider, LeapSecondedTime, SYSTEM_PROVIDER},
-    Calendar, CalendarTime, TimeResult, WrittenTimeResult,
+    leap_seconds::{SystemProvider, SystemProviderSigil, SYSTEM_PROVIDER},
+    timezone, Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult,
 };
 
 /// A calendar that counts time like the current system clock
@@ -31,7 +31,7 @@ pub struct System;
 ///
 /// Note that as this does not know of a calendar, its string functions will be giving out
 /// raw numbers that may not be user-friendly.
-pub struct SystemTime(LeapSecondedTime<leap_seconds::SystemProviderSigil>);
+pub struct SystemTime(OffsetTime<SystemProviderSigil>);
 
 // TODO: introduce a SystemDuration type with all the afferent Add/Sub(Assign) implementations?
 
@@ -51,7 +51,7 @@ impl System {
         let extra_nanos = 0;
         // TODO: Introduce an implementation of `Time::now()` based on other clocks for platforms that
         // can so this is not the best precision we could have.
-        SystemTime(LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+        SystemTime(OffsetTime::from_pseudo_nanos_since_posix_epoch(
             SYSTEM_PROVIDER.get_sigil().clone(),
             pseudo_nanos,
             extra_nanos,
@@ -91,9 +91,7 @@ impl Debug for SystemTime {
 }
 
 impl FromStr for SystemTime {
-    type Err = leap_seconds::ParseError<
-        <<leap_seconds::SystemProvider as LeapSecondProvider>::Sigil as FromStr>::Err,
-    >;
+    type Err = timezone::ParseError<<<SystemProvider as TimeZone>::Sigil as FromStr>::Err>;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(FromStr::from_str(s)?))

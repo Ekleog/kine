@@ -4,11 +4,27 @@ use core::{
     str::FromStr,
 };
 
-use crate::CalendarTime;
-
-use super::LeapSecondSigil;
+use crate::{Calendar, CalendarTime, TimeResult};
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
+
+/// A time zone
+///
+/// Time zones usually offset the visible time by some amount, and do not
+pub trait TimeZone: Calendar<Time = OffsetTime<Self::Sigil>> {
+    /// The sigil type associated to this leap second provider
+    ///
+    /// This is basically metadata added to all `LeapSecondedTime`s.
+    type Sigil: Sigil;
+
+    /// Return the (one of the) sigil(s) this leap second provider can be identified with
+    fn get_sigil(&self) -> &Self::Sigil;
+}
+
+/// The sigil for a time zone
+pub trait Sigil: Clone + Display + FromStr {
+    fn read(&self, t: &OffsetTime<Self>) -> crate::Result<TimeResult>;
+}
 
 /// A time on a time scale that needs to deal with leap seconds
 ///
@@ -17,13 +33,13 @@ const NANOS_IN_SECS: i128 = 1_000_000_000;
 /// `extra_nanos`, the number of (real) nanoseconds since we entered the current
 /// leap second and `pseudo_nanos` froze.
 #[derive(Copy, Clone)]
-pub struct LeapSecondedTime<Sig> {
+pub struct OffsetTime<Sig> {
     sigil: Sig,
     pseudo_nanos: i128,
     extra_nanos: u64,
 }
 
-impl<Sig> LeapSecondedTime<Sig> {
+impl<Sig> OffsetTime<Sig> {
     /// Build a `LeapSecondedTime` from the number of pseudo-nanoseconds between this time
     /// and the POSIX epoch
     pub const fn from_pseudo_nanos_since_posix_epoch(
@@ -56,13 +72,13 @@ impl<Sig> LeapSecondedTime<Sig> {
     }
 }
 
-impl<Sig: LeapSecondSigil> CalendarTime for LeapSecondedTime<Sig> {
+impl<Sig: Sigil> CalendarTime for OffsetTime<Sig> {
     fn read(&self) -> crate::Result<crate::TimeResult> {
         self.sigil.read(self)
     }
 }
 
-impl<Sig: Display> Display for LeapSecondedTime<Sig> {
+impl<Sig: Display> Display for OffsetTime<Sig> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -74,11 +90,11 @@ impl<Sig: Display> Display for LeapSecondedTime<Sig> {
     }
 }
 
-impl<Sig: Display> Debug for LeapSecondedTime<Sig> {
+impl<Sig: Display> Debug for OffsetTime<Sig> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         <Self as Display>::fmt(self, f)?;
         if self.extra_nanos != 0 {
-            f.write_str("(+1)")?;
+            write!(f, "(+{}ns)", self.extra_nanos)?;
         }
         Ok(())
     }
@@ -99,7 +115,7 @@ pub enum ParseError<SigErr> {
 
 // TODO: impl Error for FromStrError, once Error is in core
 
-impl<Sig: FromStr> FromStr for LeapSecondedTime<Sig> {
+impl<Sig: FromStr> FromStr for OffsetTime<Sig> {
     type Err = ParseError<Sig::Err>;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {

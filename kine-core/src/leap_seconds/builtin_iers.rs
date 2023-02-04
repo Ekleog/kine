@@ -1,11 +1,8 @@
 use core::{fmt::Display, str::FromStr};
 
-use crate::{Calendar, Duration, Error, Time, TimeResult, WrittenTimeResult};
-
-use super::{LeapSecondProvider, LeapSecondSigil, LeapSecondedTime};
-
-/// Name of the IERS Bulletin from which this list was taken (as a sigil)
-const BULLETIN: &str = " IERS-C65";
+use crate::{
+    Calendar, Duration, Error, OffsetTime, Sigil, Time, TimeResult, TimeZone, WrittenTimeResult,
+};
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
 
@@ -18,7 +15,7 @@ macro_rules! make_table {
                     Some(t) => t,
                     None => panic!("Ill-formed leap second table"),
                 },
-                LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+                OffsetTime::from_pseudo_nanos_since_posix_epoch(
                     BuiltinIersSigil,
                     $posix * NANOS_IN_SECS,
                     0,
@@ -27,6 +24,9 @@ macro_rules! make_table {
         ),* ]
     }
 }
+
+/// Name of the IERS Bulletin from which this list was taken (as a sigil)
+const BULLETIN: &str = " IERS-C65";
 
 /// LeapSecondedTime::as_pseudo_nanos_from_posix_epoch() - Time::as_tai_nanos() before the
 /// first leap second
@@ -39,7 +39,7 @@ const OFFSET_BEFORE_FIRST_LEAP: i128 = 0;
 ///
 /// A leap second happens when the offset between the elements of item N + 1 and N are not
 /// the same.
-static LEAP_SECS: [(Time, LeapSecondedTime<BuiltinIersSigil>); 28] = make_table![
+static LEAP_SECS: [(Time, OffsetTime<BuiltinIersSigil>); 28] = make_table![
     (0, 10),
     (15_724_800, 11),
     (31_622_400, 12),
@@ -84,7 +84,7 @@ impl BuiltinIers {
     }
 }
 
-impl LeapSecondProvider for BuiltinIers {
+impl TimeZone for BuiltinIers {
     type Sigil = BuiltinIersSigil;
 
     fn get_sigil(&self) -> &BuiltinIersSigil {
@@ -93,7 +93,7 @@ impl LeapSecondProvider for BuiltinIers {
 }
 
 impl Calendar for BuiltinIers {
-    type Time = LeapSecondedTime<BuiltinIersSigil>;
+    type Time = OffsetTime<BuiltinIersSigil>;
 
     fn write(&self, t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
         // Find the time in the leap seconds table
@@ -107,7 +107,7 @@ impl Calendar for BuiltinIers {
                 let pseudo_nanos =
                     leaped.as_pseudo_nanos_since_posix_epoch() + (*t - *base).nanos(); // TODO: remove derefs once Add correctly impl'd
                 return Ok(WrittenTimeResult::One(
-                    LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+                    OffsetTime::from_pseudo_nanos_since_posix_epoch(
                         BuiltinIersSigil,
                         pseudo_nanos,
                         0, // No extra nanos after last leap second
@@ -132,7 +132,7 @@ impl Calendar for BuiltinIers {
         let next_leaped_nanos = next_leaped.as_pseudo_nanos_since_posix_epoch();
         if should_be >= next_leaped_nanos {
             Ok(WrittenTimeResult::One(
-                LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
+                OffsetTime::from_pseudo_nanos_since_posix_epoch(
                     BuiltinIersSigil,
                     next_leaped_nanos - 1,
                     u64::try_from(should_be - next_leaped_nanos + 1)
@@ -141,11 +141,7 @@ impl Calendar for BuiltinIers {
             ))
         } else {
             Ok(WrittenTimeResult::One(
-                LeapSecondedTime::from_pseudo_nanos_since_posix_epoch(
-                    BuiltinIersSigil,
-                    should_be,
-                    0,
-                ),
+                OffsetTime::from_pseudo_nanos_since_posix_epoch(BuiltinIersSigil, should_be, 0),
             ))
         }
     }
@@ -163,8 +159,8 @@ impl Default for BuiltinIers {
 #[derive(Clone, Debug)]
 pub struct BuiltinIersSigil;
 
-impl LeapSecondSigil for BuiltinIersSigil {
-    fn read(&self, t: &LeapSecondedTime<Self>) -> crate::Result<TimeResult> {
+impl Sigil for BuiltinIersSigil {
+    fn read(&self, t: &OffsetTime<Self>) -> crate::Result<TimeResult> {
         // Find the interval in the leap seconds table (excluding extra time)
         let search = LEAP_SECS
             .binary_search_by_key(&t.as_pseudo_nanos_since_posix_epoch(), |(_, p)| {

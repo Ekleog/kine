@@ -7,7 +7,8 @@ use crate::Time;
 ///
 /// Note that it is assumed that a calendar will return [`Error::OutOfRange`] if
 /// it cannot represent the time. Calendars that would not support some times in
-/// the middle of their range are assumed not to exist.
+/// the middle of their range should just consider that these times are out of
+/// range.
 #[derive(Clone, Debug)]
 pub enum WrittenTimeResult<T> {
     /// There was exactly one way of writing the time
