@@ -29,7 +29,7 @@ pub trait Calendar {
 }
 
 /// Time as represented by a calendar
-pub trait CalendarTime: Debug + Display + FromStr + Sized {
+pub trait CalendarTime: Debug + Display + FromStr {
     /// Find the possible times this written time could be about
     fn read(&self) -> crate::Result<TimeResult>;
 }
