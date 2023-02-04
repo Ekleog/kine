@@ -40,8 +40,17 @@ impl System {
     ///
     /// Note that this is infallible, as the system calendar is by definition always able to
     /// store a time returned by the system clock.
-    #[cfg(feature = "std")]
+    ///
+    /// However, it will panic if running on no-std and not having a known alternative
+    /// implementation for time retrieval.
     pub fn now() -> SystemTime {
+        Self::now_impl()
+    }
+
+    // TODO: split this into a separate feature so that later on when extern existential types come
+    // in we can allow extern implementations of this?
+    #[cfg(feature = "std")]
+    fn now_impl() -> SystemTime {
         let duration = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("Current time was before posix epoch");
@@ -57,12 +66,20 @@ impl System {
             extra_nanos,
         ))
     }
+
+    #[cfg(not(feature = "std"))]
+    fn now_impl() -> SystemTime {
+        panic!("Running on no-std with no known implementation of time-getting");
+    }
 }
 
 impl Calendar for System {
     type Time = SystemTime;
 
-    #[cfg(feature = "std")]
+    fn try_now(&self) -> crate::Result<WrittenTimeResult<Self::Time>> {
+        Ok(WrittenTimeResult::One(Self::now()))
+    }
+
     fn now(&self) -> WrittenTimeResult<Self::Time> {
         WrittenTimeResult::One(Self::now())
     }

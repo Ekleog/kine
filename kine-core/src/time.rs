@@ -34,17 +34,26 @@ impl Time {
         Time { nanos }
     }
 
+    /// Return the current time as indicated by the system timezone
+    ///
+    /// Note that this will panic in no-std environments if an alternative way of getting
+    /// the time is not known for the platform.
+    pub fn try_now() -> crate::Result<TimeResult> {
+        crate::System::now().read()
+    }
+
     /// Return the current time
+    ///
+    /// If the system clock (as returned by Rust's `SystemTime::now()`) is in a non-UTC
+    /// timezone mode, then this will return any one of the possible `Time`s corresponding
+    /// to the time returned by the system clock. This should not happen anyway as Rust's
+    /// `SystemTime` should return POSIX timestamps (so, UTC) even when the system clock
+    /// is set to local time, so there should be no issue in relying on this function.
     ///
     /// Note that this will panic in no-std environments if an alternative way of getting
     /// the time is not known for the platform.
     pub fn now() -> Time {
-        #[cfg(not(feature = "std"))]
-        panic!("Running on no-std with no known implementation of time-getting");
-
-        #[cfg(feature = "std")]
-        crate::System::now()
-            .read()
+        Self::try_now()
             .expect("System time out of range")
             .any_approximate()
     }

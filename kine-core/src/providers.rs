@@ -2,10 +2,14 @@ use crate::{leap_seconds::BuiltinIers, TimeZone};
 
 cfg_if::cfg_if! {
     if #[cfg(doc)] {
-        /// Time zone the system clock is in
+        /// Time zone the `std::time::SystemTime` clock is in
         ///
         /// If this is not set properly, then all `Time`s (and dependent calculations) will
         /// be off.
+        ///
+        /// Usually, `SystemTime` returns POSIX timestamps, so this should be an IERS leap
+        /// seconds timezone. Which one you choose depends on until which date you want time
+        /// calculations to be precise.
         ///
         /// Stability note: The real type of is currently exposed only because
         /// type_alias_impl_trait is still unstable. IT WILL BE TURNED INTO
