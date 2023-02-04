@@ -9,13 +9,15 @@ jobs:
   cargo-fmt:
     name: Cargo Fmt, Clippy and Udeps
     runs-on: ubuntu-latest
+    env:
+      CARGO_FEATURES: leap-seconds-provider-builtin-iers,std,
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v18
       - run: rm -rf ~/.cargo/bin
-      - run: nix-shell --pure --run 'cargo fmt --all -- --check'
-      - run: nix-shell --pure --run 'cargo clippy --all --all-features -- -D warnings'
-      - run: nix-shell --pure --run 'cargo udeps --all-targets'
+      - run: nix-shell --pure --run "cargo fmt --all --features $CARGO_FEATURES -- --check"
+      - run: nix-shell --pure --run "cargo clippy --all --features $CARGO_FEATURES -- -D warnings"
+      - run: nix-shell --pure --run "cargo udeps --all-targets --features $CARGO_FEATURES"
 
   cargo-tests:
     name: Cargo Tests
