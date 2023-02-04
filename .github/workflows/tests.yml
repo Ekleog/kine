@@ -34,3 +34,5 @@ jobs:
       - run: nix-shell --pure --run "cargo build --all --features $CARGO_FEATURES"
       - run: nix-shell --pure --run "cargo test --all --features $CARGO_FEATURES"
       - run: nix-shell --pure --run "cargo doc --all --features $CARGO_FEATURES"
+      - run: nix-shell --pure --run "cargo clippy --all --features $CARGO_FEATURES -- -D warnings"
+      - run: nix-shell --pure --run "cargo udeps --all-targets --features $CARGO_FEATURES"
