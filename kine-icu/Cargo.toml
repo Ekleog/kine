@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 icu_calendar.workspace = true
+kine-core.workspace = true
