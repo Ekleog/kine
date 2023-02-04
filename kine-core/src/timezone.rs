@@ -22,7 +22,7 @@ pub trait TimeZone: Calendar<Time = OffsetTime<Self::Sigil>> {
 }
 
 /// The sigil for a time zone
-pub trait Sigil: Clone + Display + FromStr {
+pub trait Sigil: Display + FromStr {
     fn read(&self, t: &OffsetTime<Self>) -> crate::Result<TimeResult>;
 }
 

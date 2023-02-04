@@ -1,18 +1,41 @@
-use kine_core::{CalendarTime, OffsetTime, TimeZone};
+use kine_core::{Calendar, CalendarTime, OffsetTime, TimeZone};
 
 const NANOS_PER_SECS: i128 = 1_000_000_000;
 const NANOS_PER_MINS: i128 = 60 * NANOS_PER_SECS;
 
-/// A time represented with calendar `Cal` and timezone `Tz`
-pub struct Time<Cal: icu_calendar::AsCalendar, Tz: TimeZone> {
-    tz: Tz::Sigil,
-    time: icu_calendar::DateTime<Cal>,
+pub struct Cal<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
+    cal: Ca,
+    tz: Tz,
 }
 
-impl<Cal, Tz> CalendarTime for Time<Cal, Tz>
+/// A time represented with calendar `Ca` and timezone `Tz`
+pub struct Time<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
+    tz: Tz::Sigil,
+    time: icu_calendar::DateTime<Ca>,
+}
+
+impl<Ca, Tz> Calendar for Cal<Ca, Tz>
 where
-    Cal: icu_calendar::AsCalendar,
+    Ca: icu_calendar::AsCalendar,
+    Tz: Clone + TimeZone,
+    <Tz as TimeZone>::Sigil: Clone,
+{
+    type Time = Time<Ca, Tz>;
+
+    fn write(
+        &self,
+        t: &kine_core::Time,
+    ) -> kine_core::Result<kine_core::WrittenTimeResult<Self::Time>> {
+        let offset_time = t.write(self.tz.clone());
+        todo!()
+    }
+}
+
+impl<Ca, Tz> CalendarTime for Time<Ca, Tz>
+where
+    Ca: icu_calendar::AsCalendar,
     Tz: TimeZone,
+    <Tz as TimeZone>::Sigil: Clone,
 {
     fn read(&self) -> kine_core::Result<kine_core::TimeResult> {
         let time = self.time.to_calendar(icu_calendar::Iso);
