@@ -15,12 +15,20 @@ pub enum WrittenTimeResult<T> {
     /// This is the "normal path."
     One(T),
 
-    /// There were many ways of writing the time (more than two)
+    /// There were multiple ways of writing the time
     ///
-    /// This should not happen with well-formed calendars (any real-world instant
-    /// should have a unique way of writing it), but it can theoretically happen
-    /// in some calendars. It will probably never actually happen in practice. Only
-    /// one example way of writing the time is provided in this case.
+    /// In such cases, this variant holds one instant that tries to be "representative" of
+    /// the written time.
+    ///
+    /// For instance, a calendar that would only hold gregorian days would have 24 hours for
+    /// each written time. It could choose for instance midnight or noon as a representative
+    /// time, and return it in a `Many` clause, to make it clear that the calendar does not
+    /// actually define the time.
+    ///
+    /// Note that calendars that eg. write only up to the microsecond should probably consider
+    /// returning `One` anyway, as a microsecond is reasonably small. The distinction between
+    /// the two is definitely fuzzy, so the calendar developer should take the end-user's
+    /// likely expectations into account.
     Many(T),
 }
 
