@@ -94,23 +94,27 @@ impl<Sig: Sigil> CalendarTime for OffsetTime<Sig> {
 
 impl<Sig: Display> Display for OffsetTime<Sig> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}.{:09}{}",
-            self.pseudo_nanos / NANOS_IN_SECS,
-            (self.pseudo_nanos % NANOS_IN_SECS).abs(),
-            self.sigil,
-        )
+        let secs = self.pseudo_nanos / NANOS_IN_SECS;
+        let nanos = (self.pseudo_nanos % NANOS_IN_SECS).abs();
+        if self.pseudo_nanos < 0 && secs == 0 {
+            f.write_str("-")?; // seconds will display without the minus if it is 0
+        }
+        write!(f, "{secs}.{nanos:09}{}", self.sigil)
     }
 }
 
 impl<Sig: Display> Debug for OffsetTime<Sig> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        <Self as Display>::fmt(self, f)?;
-        if self.extra_nanos != 0 {
-            write!(f, "(+{}ns)", self.extra_nanos)?;
+        let secs = self.pseudo_nanos / NANOS_IN_SECS;
+        let nanos = (self.pseudo_nanos % NANOS_IN_SECS).abs();
+        if self.pseudo_nanos < 0 && secs == 0 {
+            f.write_str("-")?; // seconds will display without the minus if it is 0
         }
-        Ok(())
+        write!(
+            f,
+            "{secs}.{nanos:09}(+{}ns){}",
+            self.extra_nanos, self.sigil
+        )
     }
 }
 
@@ -161,5 +165,18 @@ impl<Sig: FromStr> FromStr for OffsetTime<Sig> {
             // leap second
             extra_nanos: 0,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{leap_seconds::BuiltinIersSigil, OffsetTime};
+
+    #[test]
+    fn display_small_negative_values_properly() {
+        let t = OffsetTime::from_pseudo_nanos_since_posix_epoch(BuiltinIersSigil, -1, 10);
+        let iers_sigil = BuiltinIersSigil;
+        assert_eq!(format!("{t}"), format!("-0.000000001{iers_sigil}"));
+        assert_eq!(format!("{t:?}"), format!("-0.000000001(+10ns){iers_sigil}"));
     }
 }
