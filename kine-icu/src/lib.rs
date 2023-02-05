@@ -12,6 +12,7 @@ pub struct Cal<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
 }
 
 /// A time represented with calendar `Ca` and timezone `Tz`
+#[derive(Clone, Eq, PartialEq)]
 pub struct Time<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
     tz: Tz::Sigil,
     time: icu_calendar::DateTime<Ca>,
@@ -20,6 +21,12 @@ pub struct Time<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
 impl<Ca: icu_calendar::AsCalendar, Tz: TimeZone> Cal<Ca, Tz> {
     pub fn new(cal: Ca, tz: Tz) -> Self {
         Self { cal, tz }
+    }
+}
+
+impl<Ca: icu_calendar::AsCalendar, Tz: TimeZone> Time<Ca, Tz> {
+    pub fn new(tz: Tz::Sigil, time: icu_calendar::DateTime<Ca>) -> Self {
+        Self { tz, time }
     }
 }
 
@@ -127,13 +134,34 @@ impl<Tz: TimeZone> Debug for Time<icu_calendar::Iso, Tz> {
 #[cfg(test)]
 mod tests {
     use icu_calendar::Iso;
-    use kine_core::{tz::UTC, Calendar, CalendarTime, Duration, TimeResult, WrittenTimeResult};
+    use kine_core::{
+        tz::UTC, Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
+    };
 
-    use crate::{Cal, NANOS_IN_MINS};
+    use crate::{Cal, Time, NANOS_IN_MINS};
 
     // icu4x works based on i32 minutes from epoch
     const MIN_NANOS: i128 = -(i32::MIN as i128 * NANOS_IN_MINS);
     const MAX_NANOS: i128 = -(i32::MAX as i128 * NANOS_IN_MINS);
+
+    fn mktime(nanos: i128) -> kine_core::Time {
+        kine_core::Time::POSIX_EPOCH + Duration::from_nanos(nanos)
+    }
+
+    #[test]
+    fn negative_time_writes_correctly() {
+        let time = mktime(-NANOS_IN_MINS);
+        let written = time.write(Cal::new(Iso, UTC.clone()));
+        let expected =
+            icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 00).unwrap();
+        assert_eq!(
+            written,
+            Ok(WrittenTimeResult::One(Time::new(
+                UTC.get_sigil().clone(),
+                expected
+            )))
+        );
+    }
 
     #[test]
     fn iso_conversion_round_trip() {

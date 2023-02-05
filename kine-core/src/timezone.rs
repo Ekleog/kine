@@ -11,7 +11,7 @@ const NANOS_IN_SECS: i128 = 1_000_000_000;
 /// A time zone
 ///
 /// Time zones usually offset the visible time by some amount, and do not
-pub trait TimeZone: Calendar<Time = OffsetTime<Self::Sigil>> {
+pub trait TimeZone: Calendar<Time = OffsetTime<Self::Sigil>> + Eq + PartialEq {
     /// The sigil type associated to this time zone
     ///
     /// This is basically metadata added to all `OffsetTime`s.
@@ -22,7 +22,7 @@ pub trait TimeZone: Calendar<Time = OffsetTime<Self::Sigil>> {
 }
 
 /// The sigil for a time zone
-pub trait Sigil: Display + FromStr {
+pub trait Sigil: Display + Eq + FromStr + PartialEq {
     fn read(&self, t: &OffsetTime<Self>) -> crate::Result<TimeResult>;
 }
 

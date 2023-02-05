@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bolero.workspace = true
 icu_calendar.workspace = true
+num-integer.workspace = true
 kine-core.workspace = true
 
 [dev-dependencies]

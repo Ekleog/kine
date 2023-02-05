@@ -9,7 +9,7 @@ use crate::Time;
 /// it cannot represent the time. Calendars that would not support some times in
 /// the middle of their range should just consider that these times are out of
 /// range.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum WrittenTimeResult<T> {
     /// There was exactly one way of writing the time
     ///
@@ -55,7 +55,7 @@ impl<T> WrittenTimeResult<T> {
 }
 
 /// The result of trying to figure out what real-world time matches a given written time
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TimeResult {
     /// The written time matches exactly one real-world time
     ///
@@ -102,7 +102,7 @@ impl TimeResult {
 pub type Result<T> = core::result::Result<T, Error>;
 
 /// Represents all the ways a function can fail within `kine`.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
     /// Overflowed the allowed range for the return type
     OutOfRange,

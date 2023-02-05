@@ -76,7 +76,7 @@ static LEAP_SECS: [(Time, OffsetTime<BuiltinIersSigil>); 28] = make_table![
 /// IERS leap second table.
 // TODO: Make Copy again when clippy no longer complains about an unused clone
 // (ie. when System will be a proper existential trait)
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct BuiltinIers;
 
 impl BuiltinIers {
@@ -158,7 +158,7 @@ impl Default for BuiltinIers {
 /// The sigil for the built-in IERS table
 // TODO: Make Copy again when clippy no longer complains about an unused clone
 // (ie. when System will be a proper existential trait)
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BuiltinIersSigil;
 
 impl Sigil for BuiltinIersSigil {
