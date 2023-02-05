@@ -135,7 +135,8 @@ impl<Tz: TimeZone> Debug for Time<icu_calendar::Iso, Tz> {
 mod tests {
     use icu_calendar::Iso;
     use kine_core::{
-        tz::UTC, Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
+        tz::{Utc, UTC},
+        Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
     };
 
     use crate::{Cal, Time, NANOS_IN_MINS};
@@ -161,6 +162,17 @@ mod tests {
                 expected
             )))
         );
+    }
+
+    #[test]
+    fn negative_time_reads_correctly() {
+        let time: Time<Iso, Utc> = Time::new(
+            UTC.get_sigil().clone(),
+            icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 10).unwrap(),
+        );
+        let read = time.read();
+        let expected = mktime(-NANOS_IN_MINS);
+        assert_eq!(read, Ok(TimeResult::One(expected)));
     }
 
     #[test]
