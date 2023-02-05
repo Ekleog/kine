@@ -76,7 +76,7 @@ static LEAP_SECS: [(Time, OffsetTime<BuiltinIersSigil>); 28] = make_table![
 /// IERS leap second table.
 // TODO: Make Copy again when clippy no longer complains about an unused clone
 // (ie. when System will be a proper existential trait)
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BuiltinIers;
 
 impl BuiltinIers {
@@ -222,9 +222,46 @@ impl FromStr for BuiltinIersSigil {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Calendar, CalendarTime, Error, Time, TimeResult, WrittenTimeResult};
+    use crate::{Calendar, CalendarTime, Error, OffsetTime, Time, TimeResult, WrittenTimeResult};
 
-    use super::{BuiltinIers, NANOS_IN_SECS};
+    use super::{BuiltinIers, BuiltinIersSigil, NANOS_IN_SECS};
+
+    #[test]
+    fn convert_close_to_posix_epoch() {
+        const HALF_SEC: i128 = NANOS_IN_SECS / 2;
+
+        // After the posix epoch, all is nice: there is no offset.
+        assert_eq!(
+            Time::from_nanos_since_posix_epoch(HALF_SEC).write(BuiltinIers),
+            Ok(WrittenTimeResult::One(
+                OffsetTime::from_pseudo_nanos_since_posix_epoch(BuiltinIersSigil, HALF_SEC, 0)
+            ))
+        );
+        assert_eq!(
+            OffsetTime::from_pseudo_nanos_since_posix_epoch(BuiltinIersSigil, HALF_SEC, 0).read(),
+            Ok(TimeResult::One(Time::from_nanos_since_posix_epoch(
+                HALF_SEC
+            ))),
+        );
+
+        // Before the posix epoch, nothing is nice: there is a 10s offset.
+        assert_eq!(
+            Time::from_nanos_since_posix_epoch(-HALF_SEC).write(BuiltinIers),
+            Ok(WrittenTimeResult::One(
+                OffsetTime::from_pseudo_nanos_since_posix_epoch(
+                    BuiltinIersSigil,
+                    -1,
+                    u64::try_from(19 * HALF_SEC + 1).unwrap(),
+                )
+            ))
+        );
+        assert_eq!(
+            OffsetTime::from_pseudo_nanos_since_posix_epoch(BuiltinIersSigil, -HALF_SEC, 0).read(),
+            Ok(TimeResult::One(Time::from_nanos_since_posix_epoch(
+                -21 * HALF_SEC
+            ))),
+        );
+    }
 
     #[test]
     fn leap_conversion_round_trip() {

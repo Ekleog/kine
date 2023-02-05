@@ -32,7 +32,7 @@ pub trait Sigil: Display + Eq + FromStr + PartialEq {
 /// the POSIX epoch and the point in time according to this time scale, and
 /// `extra_nanos`, the number of (real) nanoseconds since we entered the current
 /// leap second and `pseudo_nanos` froze.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct OffsetTime<Sig> {
     sigil: Sig,
     pseudo_nanos: i128,
@@ -42,6 +42,20 @@ pub struct OffsetTime<Sig> {
 impl<Sig> OffsetTime<Sig> {
     /// Build a `LeapSecondedTime` from the number of pseudo-nanoseconds between this time
     /// and the POSIX epoch
+    ///
+    /// `pseudo_nanos` represent the number of nanoseconds since the POSIX epoch, and
+    /// `extra_nanos` the number of real-world nanoseconds that elapsed since the time at
+    /// which `pseudo-nanos` froze, which can be used to represent leap seconds.
+    ///
+    /// Note that no attempt is made to validate that this time is actually correct for
+    /// timezone, be it due to leap seconds being invalidly set or to `pseudo_nanos`
+    /// requesting a time that never existed eg. due to a timezone shift. If you manually
+    /// build an `OffsetTime` with invalid values, you may see strange results. This
+    /// function is mostly exposed for the implementers of `TimeZone` themselves.
+    // TODO: Get rid of the command above by introducing a "token" that is
+    // timezone-specific to prove that the function call came from the `TimeZone`? But
+    // then how is eg. `kine-icu` supposed to generate the `OffsetTime` when reading
+    // a calendar date?
     pub const fn from_pseudo_nanos_since_posix_epoch(
         sigil: Sig,
         pseudo_nanos: i128,
