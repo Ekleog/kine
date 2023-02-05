@@ -1,8 +1,10 @@
+use std::fmt::{self, Debug, Display};
+
 use icu_calendar::types::{IsoSecond, NanoSecond};
 use kine_core::{Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult};
 
-const NANOS_PER_SECS: i128 = 1_000_000_000;
-const NANOS_PER_MINS: i128 = 60 * NANOS_PER_SECS;
+const NANOS_IN_SECS: i128 = 1_000_000_000;
+const NANOS_IN_MINS: i128 = 60 * NANOS_IN_SECS;
 
 pub struct Cal<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
     cal: Ca,
@@ -13,6 +15,12 @@ pub struct Cal<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
 pub struct Time<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
     tz: Tz::Sigil,
     time: icu_calendar::DateTime<Ca>,
+}
+
+impl<Ca: icu_calendar::AsCalendar, Tz: TimeZone> Cal<Ca, Tz> {
+    pub fn new(cal: Ca, tz: Tz) -> Self {
+        Self { cal, tz }
+    }
 }
 
 impl<Ca, Tz> Cal<Ca, Tz>
@@ -27,10 +35,10 @@ where
     ) -> kine_core::Result<WrittenTimeResult<Time<Ca, Tz>>> {
         let pseudo_nanos = offset_time.as_pseudo_nanos_since_posix_epoch();
         let extra_nanos = i128::from(offset_time.extra_nanos());
-        let minutes = pseudo_nanos / NANOS_PER_MINS;
-        let submin_pseudo_nanos = pseudo_nanos % NANOS_PER_MINS + extra_nanos;
-        let seconds = submin_pseudo_nanos / NANOS_PER_SECS;
-        let nanos = submin_pseudo_nanos % NANOS_PER_SECS;
+        let minutes = pseudo_nanos / NANOS_IN_MINS;
+        let submin_pseudo_nanos = pseudo_nanos % NANOS_IN_MINS + extra_nanos;
+        let seconds = submin_pseudo_nanos / NANOS_IN_SECS;
+        let nanos = submin_pseudo_nanos % NANOS_IN_SECS;
 
         let minutes = i32::try_from(minutes).map_err(|_| kine_core::Error::OutOfRange)?;
         let mut res = icu_calendar::DateTime::from_minutes_since_local_unix_epoch(minutes);
@@ -79,8 +87,8 @@ where
             60 => u64::from(time.time.nanosecond.number()),
             _ => 0,
         };
-        let local_nanos = local_mins * NANOS_PER_MINS
-            + i128::from(seconds_outside_leap) * NANOS_PER_SECS
+        let local_nanos = local_mins * NANOS_IN_MINS
+            + i128::from(seconds_outside_leap) * NANOS_IN_SECS
             + nanos_outside_leap;
         let offset_time = OffsetTime::from_pseudo_nanos_since_posix_epoch(
             self.tz.clone(),
@@ -88,5 +96,80 @@ where
             extra_nanos,
         );
         offset_time.read()
+    }
+}
+
+impl<Tz: TimeZone> Display for Time<icu_calendar::Iso, Tz> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
+        let date = &self.time.date;
+        let time = &self.time.time;
+        write!(
+            f,
+            "{}-{:02}-{:02}T{:02}:{:02}:{:02}.{:09}{}",
+            date.year().number,
+            date.month().ordinal,
+            date.day_of_month().0,
+            time.hour.number(),
+            time.minute.number(),
+            time.second.number(),
+            time.nanosecond.number(),
+            self.tz,
+        )
+    }
+}
+
+impl<Tz: TimeZone> Debug for Time<icu_calendar::Iso, Tz> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        <Self as Display>::fmt(self, f)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use icu_calendar::Iso;
+    use kine_core::{tz::UTC, Calendar, CalendarTime, Duration, TimeResult, WrittenTimeResult};
+
+    use crate::{Cal, NANOS_IN_MINS};
+
+    // icu4x works based on i32 minutes from epoch
+    const MIN_NANOS: i128 = -(i32::MIN as i128 * NANOS_IN_MINS);
+    const MAX_NANOS: i128 = -(i32::MAX as i128 * NANOS_IN_MINS);
+
+    #[test]
+    fn iso_conversion_round_trip() {
+        bolero::check!().with_type::<i128>().for_each(|&t| {
+            let assert_out_of_range = |t| {
+                assert!(
+                    t < MIN_NANOS || t > MAX_NANOS,
+                    "Returned out of range for time {t} that is not close to the ends of the range"
+                )
+            };
+            let time = kine_core::Time::POSIX_EPOCH + Duration::from_nanos(t);
+            let cal = Cal::new(Iso, UTC.clone());
+            let formatted = match cal.write(&time) {
+                Err(kine_core::Error::OutOfRange) => {
+                    assert_out_of_range(t);
+                    return;
+                }
+                Ok(WrittenTimeResult::Many(r)) => {
+                    panic!("Converting time to formatted ISO time returned multiple results, like {r:?}")
+                }
+                Ok(WrittenTimeResult::One(t)) => t,
+            };
+            let time_bis = match formatted.read() {
+                Err(kine_core::Error::OutOfRange) => {
+                    assert_out_of_range(t);
+                    return;
+                }
+                Ok(TimeResult::One(t)) => t,
+                Ok(t) => panic!(
+                    "Converting formatted ISO time to time did not return exactly one result: {t:?}"
+                ),
+            };
+            assert_eq!(
+                time, time_bis,
+                "Round-tripping through formatted ISO time lost information"
+            );
+        })
     }
 }

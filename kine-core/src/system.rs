@@ -1,8 +1,6 @@
 use core::fmt::{self, Debug};
 
-use crate::{
-    providers, Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult,
-};
+use crate::{providers, Calendar, CalendarTime, OffsetTime, TimeResult, WrittenTimeResult};
 
 /// A calendar that counts time like the current system clock
 ///
@@ -47,6 +45,8 @@ impl System {
     // in we can allow extern implementations of this?
     #[cfg(feature = "std")]
     fn now_impl() -> SystemTime {
+        use crate::TimeZone;
+
         let duration = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("Current time was before posix epoch");

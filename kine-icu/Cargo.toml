@@ -4,5 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bolero.workspace = true
 icu_calendar.workspace = true
 kine-core.workspace = true
+
+[dev-dependencies]
+kine-core = { workspace = true, features = [
+    "tz-system-provider-builtin-iers",
+    "tz-utc-provider-builtin-iers",
+] }

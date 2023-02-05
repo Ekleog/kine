@@ -16,13 +16,13 @@ pub use time::Time;
 pub mod timezone;
 pub use timezone::{OffsetTime, Sigil, TimeZone};
 
+pub mod tz {
+    pub use crate::providers::UTC;
+}
+
 /// A date and time as indicated by a calendar
 ///
 /// Anything user-visible should probably be handled using this type. However,
 /// remember that operations on it can be vastly different from operations on
 /// regular times, durations are often not commutative, etc.
 pub type WrittenTime<Cal> = <Cal as Calendar>::Time;
-
-// TODO: before release, consider discarding all the trait bounds related to
-// display and strings; but still keep them implemented for our types where it
-// makes sense.

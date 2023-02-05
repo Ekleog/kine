@@ -74,7 +74,9 @@ static LEAP_SECS: [(Time, OffsetTime<BuiltinIersSigil>); 28] = make_table![
 
 /// Leap second provider that uses the builtin, latest-at-the-time-of-last-`kine-core`-update
 /// IERS leap second table.
-#[derive(Clone, Copy)]
+// TODO: Make Copy again when clippy no longer complains about an unused clone
+// (ie. when System will be a proper existential trait)
+#[derive(Clone)]
 pub struct BuiltinIers;
 
 impl BuiltinIers {
