@@ -4,6 +4,7 @@ use icu_calendar::types::{IsoSecond, NanoSecond};
 use kine_core::{Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult};
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
+const NANOS_IN_SECS_U64: u64 = 1_000_000_000;
 const NANOS_IN_MINS: i128 = 60 * NANOS_IN_SECS;
 
 pub struct Cal<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
@@ -85,17 +86,22 @@ where
         let time = self.time.to_calendar(icu_calendar::Iso);
         let local_mins = i128::from(time.minutes_since_local_unix_epoch());
         // TODO: revisit after https://github.com/unicode-org/icu4x/issues/3085 answered
-        let seconds_outside_leap = time.time.second.number();
-        let nanos_outside_leap = match seconds_outside_leap {
-            60 => 0, // Already counted in seconds
-            _ => i128::from(time.time.nanosecond.number()),
+        let seconds_with_leap = time.time.second.number();
+        let seconds_without_leap = std::cmp::min(seconds_with_leap, 59);
+        let nanos_outside_leap = match seconds_with_leap > 59 {
+            true => NANOS_IN_SECS - 1,
+            false => i128::from(time.time.nanosecond.number()),
         };
-        let extra_nanos = match seconds_outside_leap {
-            60 => u64::from(time.time.nanosecond.number()),
-            _ => 0,
+        let extra_nanos = match seconds_with_leap > 59 {
+            true => {
+                u64::from(time.time.nanosecond.number())
+                    + u64::from(seconds_with_leap - 60) * NANOS_IN_SECS_U64
+                    + 1
+            }
+            false => 0,
         };
         let local_nanos = local_mins * NANOS_IN_MINS
-            + i128::from(seconds_outside_leap) * NANOS_IN_SECS
+            + i128::from(seconds_without_leap) * NANOS_IN_SECS
             + nanos_outside_leap;
         let offset_time = OffsetTime::from_pseudo_nanos_since_posix_epoch(
             self.tz.clone(),
@@ -133,17 +139,19 @@ impl<Tz: TimeZone> Debug for Time<icu_calendar::Iso, Tz> {
 
 #[cfg(test)]
 mod tests {
-    use icu_calendar::Iso;
+    use icu_calendar::{types::NanoSecond, Iso};
     use kine_core::{
         tz::{Utc, UTC},
         Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
     };
 
-    use crate::{Cal, Time, NANOS_IN_MINS};
+    use crate::{Cal, Time, NANOS_IN_MINS, NANOS_IN_SECS};
 
     // icu4x works based on i32 minutes from epoch
     const MIN_NANOS: i128 = -(i32::MIN as i128 * NANOS_IN_MINS);
     const MAX_NANOS: i128 = -(i32::MAX as i128 * NANOS_IN_MINS);
+
+    const NANOS_IN_SECS_U32: u32 = 1_000_000_000;
 
     fn mktime(nanos: i128) -> kine_core::Time {
         kine_core::Time::POSIX_EPOCH + Duration::from_nanos(nanos)
@@ -161,6 +169,23 @@ mod tests {
                 UTC.get_sigil().clone(),
                 expected
             )))
+        );
+    }
+
+    #[test]
+    fn leap_second_reads_correctly() {
+        let mut time: Time<Iso, Utc> = Time::new(
+            UTC.get_sigil().clone(),
+            icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 60).unwrap(),
+        );
+        assert_eq!(
+            time.read(),
+            Ok(TimeResult::One(mktime(-10 * NANOS_IN_SECS)))
+        );
+        time.time.time.nanosecond = NanoSecond::try_from(NANOS_IN_SECS_U32 / 2).unwrap();
+        assert_eq!(
+            time.read(),
+            Ok(TimeResult::One(mktime(-19 * NANOS_IN_SECS / 2)))
         );
     }
 
