@@ -11,3 +11,7 @@ cfg-if = "1.0"
 icu_calendar = "1.1"
 kine-core = { path = "./kine-core" }
 num-integer = "0.1.45"
+
+[patch.crates-io]
+# See https://github.com/unicode-org/icu4x/pull/3087
+icu_calendar = { git = "https://github.com/Ekleog/icu4x", rev = "5266a2547451c771f50da1c614b8ac9b7d49557f" }

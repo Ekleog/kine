@@ -139,7 +139,10 @@ impl<Tz: TimeZone> Debug for Time<icu_calendar::Iso, Tz> {
 
 #[cfg(test)]
 mod tests {
-    use icu_calendar::{types::NanoSecond, Iso};
+    use icu_calendar::{
+        types::{IsoSecond, NanoSecond},
+        Iso,
+    };
     use kine_core::{
         tz::{Utc, UTC},
         Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
@@ -174,6 +177,7 @@ mod tests {
 
     #[test]
     fn leap_second_reads_correctly() {
+        // Normal behavior with one second
         let mut time: Time<Iso, Utc> = Time::new(
             UTC.get_sigil().clone(),
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 60).unwrap(),
@@ -186,6 +190,23 @@ mod tests {
         assert_eq!(
             time.read(),
             Ok(TimeResult::One(mktime(-19 * NANOS_IN_SECS / 2)))
+        );
+
+        // Love the 10 seconds at posix epoch
+        time.time.time.second = IsoSecond::try_from(61_u8).unwrap();
+        assert_eq!(
+            time.read(),
+            Ok(TimeResult::One(mktime(-17 * NANOS_IN_SECS / 2)))
+        );
+        time.time.time.second = IsoSecond::try_from(65_u8).unwrap();
+        assert_eq!(
+            time.read(),
+            Ok(TimeResult::One(mktime(-9 * NANOS_IN_SECS / 2)))
+        );
+        time.time.time.second = IsoSecond::try_from(69_u8).unwrap();
+        assert_eq!(
+            time.read(),
+            Ok(TimeResult::One(mktime(-NANOS_IN_SECS / 2)))
         );
     }
 
