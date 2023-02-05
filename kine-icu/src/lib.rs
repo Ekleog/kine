@@ -42,10 +42,10 @@ where
     ) -> kine_core::Result<WrittenTimeResult<Time<Ca, Tz>>> {
         let pseudo_nanos = offset_time.as_pseudo_nanos_since_posix_epoch();
         let extra_nanos = i128::from(offset_time.extra_nanos());
-        let minutes = pseudo_nanos / NANOS_IN_MINS;
-        let submin_pseudo_nanos = pseudo_nanos % NANOS_IN_MINS + extra_nanos;
-        let seconds = submin_pseudo_nanos / NANOS_IN_SECS;
-        let nanos = submin_pseudo_nanos % NANOS_IN_SECS;
+        let (minutes, submin_pseudo_nanos) =
+            num_integer::div_mod_floor(pseudo_nanos, NANOS_IN_MINS);
+        let (seconds, nanos) =
+            num_integer::div_mod_floor(submin_pseudo_nanos + extra_nanos, NANOS_IN_SECS);
 
         let minutes = i32::try_from(minutes).map_err(|_| kine_core::Error::OutOfRange)?;
         let mut res = icu_calendar::DateTime::from_minutes_since_local_unix_epoch(minutes);
