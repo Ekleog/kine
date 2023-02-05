@@ -153,7 +153,7 @@ mod tests {
         let time = mktime(-NANOS_IN_MINS);
         let written = time.write(Cal::new(Iso, UTC.clone()));
         let expected =
-            icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 00).unwrap();
+            icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 10).unwrap();
         assert_eq!(
             written,
             Ok(WrittenTimeResult::One(Time::new(
