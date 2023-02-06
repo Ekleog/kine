@@ -14,3 +14,9 @@ icu = [ "dep:kine-icu" ]
 [dependencies]
 kine-core.workspace = true
 kine-icu = { workspace = true, optional = true }
+
+[dev-dependencies]
+kine-core = { workspace = true, features = [
+    "tz-system-provider-builtin-iers",
+    "tz-utc-provider-builtin-iers",
+] }
