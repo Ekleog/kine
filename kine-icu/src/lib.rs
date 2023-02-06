@@ -20,12 +20,13 @@ const NANOS_IN_SECS: i128 = 1_000_000_000;
 const NANOS_IN_SECS_U64: u64 = 1_000_000_000;
 const NANOS_IN_MINS: i128 = 60 * NANOS_IN_SECS;
 
+/// A calendar based on icu4x
 pub struct Cal<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
     cal: Ca,
     tz: Tz,
 }
 
-/// A time represented with calendar `Ca` and timezone `Tz`
+/// A time represented with an icu4x calendar and any kine timezone
 #[derive(Clone, Eq, PartialEq)]
 pub struct Time<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
     tz: Tz::Sigil,
