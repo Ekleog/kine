@@ -158,8 +158,7 @@ mod tests {
         Iso,
     };
     use kine_core::{
-        tz::{Utc, UTC},
-        Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
+        tz::Utc, Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
     };
 
     use crate::{Cal, Time, NANOS_IN_MINS, NANOS_IN_SECS};
@@ -177,13 +176,13 @@ mod tests {
     #[test]
     fn negative_time_writes_correctly() {
         let time = mktime(-NANOS_IN_MINS);
-        let written = time.write(Cal::new(Iso, UTC.clone()));
+        let written = time.write(Cal::new(Iso, Utc.clone()));
         let expected =
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 10).unwrap();
         assert_eq!(
             written,
             Ok(WrittenTimeResult::One(Time::new(
-                UTC.get_sigil().clone(),
+                Utc.get_sigil().clone(),
                 expected
             )))
         );
@@ -193,7 +192,7 @@ mod tests {
     fn leap_second_reads_correctly() {
         // Normal behavior with one second
         let mut time: Time<Iso, Utc> = Time::new(
-            UTC.get_sigil().clone(),
+            Utc.get_sigil().clone(),
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 60).unwrap(),
         );
         assert_eq!(
@@ -224,7 +223,7 @@ mod tests {
     #[test]
     fn negative_time_reads_correctly() {
         let time: Time<Iso, Utc> = Time::new(
-            UTC.get_sigil().clone(),
+            Utc.get_sigil().clone(),
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 10).unwrap(),
         );
         let read = time.read();
@@ -242,7 +241,7 @@ mod tests {
                 )
             };
             let time = kine_core::Time::POSIX_EPOCH + Duration::from_nanos(t);
-            let cal = Cal::new(Iso, UTC.clone());
+            let cal = Cal::new(Iso, Utc.clone());
             let formatted = match cal.write(&time) {
                 Err(kine_core::Error::OutOfRange) => {
                     assert_out_of_range(t);

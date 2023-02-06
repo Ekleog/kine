@@ -104,7 +104,7 @@ impl Calendar for BuiltinIers {
 
         // Handle the easy cases of time at a leap second or after the last leap second
         let id_after = match search {
-            Ok(i) => return Ok(WrittenTimeResult::One(LEAP_SECS[i].1.clone())),
+            Ok(i) => return Ok(WrittenTimeResult::One(LEAP_SECS[i].1)),
             Err(i) if i == LEAP_SECS.len() => {
                 let (base, leaped) = LEAP_SECS.last().unwrap();
                 let pseudo_nanos =

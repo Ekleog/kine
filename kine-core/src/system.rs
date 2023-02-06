@@ -57,7 +57,7 @@ impl System {
         // TODO: Introduce an implementation of `Time::now()` based on other clocks for platforms that
         // can so this is not the best precision we could have.
         SystemTime(OffsetTime::from_pseudo_nanos_since_posix_epoch(
-            providers::SYSTEM.get_sigil().clone(),
+            *providers::SYSTEM.get_sigil(),
             pseudo_nanos,
             extra_nanos,
         ))
