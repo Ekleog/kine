@@ -2,11 +2,7 @@ use core::{fmt::Display, str::FromStr};
 
 use crate::{Calendar, CalendarTime, OffsetTime, Sigil, TimeZone};
 
-/// The passed sigil was not one of the valid ones for this timezone
-#[derive(Clone, Copy, Debug)]
-pub struct InvalidSigil;
-
-// TODO: derive Error for InvalidSigil
+use super::InvalidSigil;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Utc;
