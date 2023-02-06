@@ -20,6 +20,7 @@ const NANOS_IN_DAYS: i128 = NANOS_IN_HOURS * 24;
 const NANOS_IN_WEEKS: i128 = NANOS_IN_DAYS * 7;
 
 impl Duration {
+    /// Duration of zero, between a given time point and itself
     pub const ZERO: Duration = Duration { nanos: 0 };
 
     /// Create a Duration that lasts for `nanos` nanoseconds

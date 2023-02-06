@@ -1,8 +1,12 @@
+#![doc = include_str!("../../README.md")]
+#![warn(missing_docs)]
+
 use std::fmt::{self, Debug, Display};
 
 use icu_calendar::types::{IsoSecond, NanoSecond};
 use kine_core::{Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult};
 
+/// Re-export of `icu_calendar` calendars
 pub mod cal {
     pub use icu_calendar;
     pub use icu_calendar::{
@@ -34,12 +38,19 @@ pub struct Time<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
 }
 
 impl<Ca: icu_calendar::AsCalendar, Tz: TimeZone> Cal<Ca, Tz> {
+    /// Create a calendar with the given settings
+    ///
+    /// This allows creating a `kine` calendar that deals with time in the `tz` timezone, and
+    /// whose days are in the `cal` calendar.
     pub fn new(cal: Ca, tz: Tz) -> Self {
         Self { cal, tz }
     }
 }
 
 impl<Ca: icu_calendar::AsCalendar, Tz: TimeZone> Time<Ca, Tz> {
+    /// Create a `Time` from known sigils and datetimes
+    ///
+    /// Usually you will not need this, and should just use the `.read` and `.write` methods.
     pub fn new(tz: Tz::Sigil, time: icu_calendar::DateTime<Ca>) -> Self {
         Self { tz, time }
     }

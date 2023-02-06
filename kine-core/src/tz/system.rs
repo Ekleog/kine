@@ -2,11 +2,18 @@ use core::{fmt::Display, str::FromStr};
 
 use crate::{Calendar, CalendarTime, OffsetTime, Sigil, TimeZone};
 
-use super::InvalidSigil;
+use super::InvalidSigilError;
 
+/// The system timezone
+///
+/// This is the timezone that `std::time::SystemTime` is in. Usually, this and `Utc` will
+/// be set to be equal.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct System;
 
+/// Sigil for the system timezone
+///
+/// This is only exposed so that it is possible to write the `OffsetTime<UtcSigil>` struct.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct SystemSigil;
 
@@ -50,13 +57,13 @@ impl Display for SystemSigil {
 }
 
 impl FromStr for SystemSigil {
-    type Err = InvalidSigil;
+    type Err = InvalidSigilError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "Z" => Ok(SystemSigil),
             " UTC" => Ok(SystemSigil),
-            _ => Err(InvalidSigil),
+            _ => Err(InvalidSigilError),
         }
     }
 }

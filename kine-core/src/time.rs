@@ -39,6 +39,8 @@ impl Time {
     /// Note that this will panic in no-std environments if an alternative way of getting
     /// the time is not known for the platform.
     pub fn try_now() -> crate::Result<TimeResult> {
+        // TODO: Introduce hacks to really always be monotonic, eg. based on std::Instant
+        // after the first time a duration was acquired?
         crate::System::now().read()
     }
 
@@ -58,10 +60,12 @@ impl Time {
             .any_approximate()
     }
 
+    /// Read the current time from a given written time
     pub fn read<Tim: CalendarTime>(t: Tim) -> crate::Result<TimeResult> {
         t.read()
     }
 
+    /// Write the current time in a given calendar
     pub fn write<Cal: Calendar>(
         &self,
         cal: Cal,

@@ -1,4 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![doc = include_str!("../../README.md")]
+#![warn(missing_docs)]
 
 mod calendar;
 mod duration;
@@ -8,15 +10,15 @@ mod system;
 mod time;
 mod timezone;
 
+pub mod leap_seconds;
+pub mod tz;
+
 pub use calendar::{Calendar, CalendarTime};
 pub use duration::Duration;
-pub mod leap_seconds;
 pub use results::{Error, Result, TimeResult, WrittenTimeResult};
 pub use system::{System, SystemTime};
 pub use time::Time;
 pub use timezone::{OffsetTime, ParseError, Sigil, TimeZone};
-
-pub mod tz;
 
 /// A date and time as indicated by a calendar
 ///

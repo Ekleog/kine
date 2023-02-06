@@ -2,11 +2,15 @@ use core::{fmt::Display, str::FromStr};
 
 use crate::{Calendar, CalendarTime, OffsetTime, Sigil, TimeZone};
 
-use super::InvalidSigil;
+use super::InvalidSigilError;
 
+/// The UTC timezone
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Utc;
 
+/// Sigil for the UTC timezone
+///
+/// This is only exposed so that it is possible to write the `OffsetTime<UtcSigil>` struct.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct UtcSigil;
 
@@ -50,13 +54,13 @@ impl Display for UtcSigil {
 }
 
 impl FromStr for UtcSigil {
-    type Err = InvalidSigil;
+    type Err = InvalidSigilError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "Z" => Ok(UtcSigil),
             " UTC" => Ok(UtcSigil),
-            _ => Err(InvalidSigil),
+            _ => Err(InvalidSigilError),
         }
     }
 }

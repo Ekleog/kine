@@ -1,8 +1,8 @@
 use core::{fmt::Display, str::FromStr};
 
 use crate::{
-    tz::InvalidSigil, Calendar, Duration, Error, OffsetTime, Sigil, Time, TimeResult, TimeZone,
-    WrittenTimeResult,
+    tz::InvalidSigilError, Calendar, Duration, Error, OffsetTime, Sigil, Time, TimeResult,
+    TimeZone, WrittenTimeResult,
 };
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
@@ -205,12 +205,12 @@ impl Display for BuiltinIersSigil {
 }
 
 impl FromStr for BuiltinIersSigil {
-    type Err = InvalidSigil;
+    type Err = InvalidSigilError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "" | " IERS" | BULLETIN => Ok(BuiltinIersSigil),
-            _ => Err(InvalidSigil),
+            _ => Err(InvalidSigilError),
         }
     }
 }
