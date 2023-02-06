@@ -1,9 +1,10 @@
 [package]
 name = "kine-core"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Correct and human-readable time handling for Rust"
 repository = "https://github.com/Ekleog/kine"
+documentation = "https://docs.rs/kine-core"
 license = "MIT OR Apache-2.0"
 keywords = ["calendar", "date", "no-std", "time"]
 categories = ["aerospace", "date-and-time", "no-std::no-alloc"]
