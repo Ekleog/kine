@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+default = ["std"]
+std = []
 tz-system-provider-builtin-iers = []
 tz-utc-provider-builtin-iers = []
-std = []
 
 [dependencies]
 cfg-if.workspace = true

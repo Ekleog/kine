@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "examples",
     "kine",
     "kine-core",
     "kine-icu",
@@ -9,6 +10,7 @@ members = [
 bolero = "0.8.0"
 cfg-if = "1.0"
 icu_calendar = "1.1"
+kine = { path = "./kine" }
 kine-core = { path = "./kine-core" }
 num-integer = "0.1.45"
 

@@ -1,0 +1,8 @@
+[package]
+name = "examples"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+kine.workspace = true
+kine-core.workspace = true

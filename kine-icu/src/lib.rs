@@ -204,10 +204,7 @@ mod tests {
             Ok(TimeResult::One(mktime(-9 * NANOS_IN_SECS / 2)))
         );
         time.time.time.second = IsoSecond::try_from(69_u8).unwrap();
-        assert_eq!(
-            time.read(),
-            Ok(TimeResult::One(mktime(-NANOS_IN_SECS / 2)))
-        );
+        assert_eq!(time.read(), Ok(TimeResult::One(mktime(-NANOS_IN_SECS / 2))));
     }
 
     #[test]
