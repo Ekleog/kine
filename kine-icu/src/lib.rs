@@ -1,3 +1,4 @@
+//! Kine calendar for icu4x
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 

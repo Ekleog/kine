@@ -1,6 +1,6 @@
 [package]
 name = "kine"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Correct and human-readable time handling for Rust"
 repository = "https://github.com/Ekleog/kine"
@@ -11,6 +11,10 @@ categories = ["aerospace", "date-and-time", "internationalization", "localizatio
 
 [features]
 icu = [ "dep:kine-icu" ]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 kine-core.workspace = true
