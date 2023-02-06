@@ -2,6 +2,11 @@
 name = "kine-icu"
 version = "0.1.0"
 edition = "2021"
+description = "Correct and human-readable time handling for Rust"
+repository = "https://github.com/Ekleog/kine"
+license = "MIT OR Apache-2.0"
+keywords = ["calendar", "date", "no-std", "time", "unicode"]
+categories = ["date-and-time", "internationalization", "localization", "no-std::no-alloc", "value-formatting"]
 
 [dependencies]
 bolero.workspace = true
