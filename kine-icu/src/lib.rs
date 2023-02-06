@@ -59,6 +59,16 @@ impl<Ca: icu_calendar::AsCalendar, Tz: TimeZone> Time<Ca, Tz> {
     pub fn new(tz: Tz::Sigil, time: icu_calendar::DateTime<Ca>) -> Self {
         Self { tz, time }
     }
+
+    /// Retrieve the timezone associated with this time
+    pub fn tz(&self) -> &Tz::Sigil {
+        &self.tz
+    }
+
+    /// Retrieve the `icu_calendar::DateTime` associated with this time
+    pub fn icu(&self) -> &icu_calendar::DateTime<Ca> {
+        &self.time
+    }
 }
 
 impl<Ca, Tz> Calendar for Cal<Ca, Tz>

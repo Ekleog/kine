@@ -10,6 +10,8 @@ members = [
 bolero = "0.8.0"
 cfg-if = "1.0"
 icu_calendar = "1.1"
+icu_datetime = "1.1"
+icu_testdata = "1.1"
 kine = { version = "0.1.0", path = "./kine" }
 kine-core = { version = "0.1.0", path = "./kine-core" }
 kine-icu = { version = "0.1.0", path = "./kine-icu" }
