@@ -3,6 +3,19 @@ use std::fmt::{self, Debug, Display};
 use icu_calendar::types::{IsoSecond, NanoSecond};
 use kine_core::{Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult};
 
+pub mod cal {
+    pub use icu_calendar;
+    pub use icu_calendar::{
+        buddhist::Buddhist,
+        coptic::Coptic,
+        ethiopian::Ethiopian,
+        indian::Indian,
+        japanese::{Japanese, JapaneseExtended},
+        julian::Julian,
+        Gregorian, Iso,
+    };
+}
+
 const NANOS_IN_SECS: i128 = 1_000_000_000;
 const NANOS_IN_SECS_U64: u64 = 1_000_000_000;
 const NANOS_IN_MINS: i128 = 60 * NANOS_IN_SECS;

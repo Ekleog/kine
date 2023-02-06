@@ -3,5 +3,9 @@ name = "kine"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+icu = [ "dep:kine-icu" ]
+
 [dependencies]
 kine-core.workspace = true
+kine-icu = { workspace = true, optional = true }
