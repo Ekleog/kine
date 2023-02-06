@@ -4,4 +4,5 @@
 pub use kine_core::*;
 
 #[cfg(feature = "icu")]
+#[doc(inline)]
 pub use kine_icu as icu;
