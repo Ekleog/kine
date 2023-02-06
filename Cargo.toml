@@ -10,9 +10,9 @@ members = [
 bolero = "0.8.0"
 cfg-if = "1.0"
 icu_calendar = "1.1"
-kine = { path = "./kine" }
-kine-core = { path = "./kine-core" }
-kine-icu = { path = "./kine-icu" }
+kine = { version = "0.1.0", path = "./kine" }
+kine-core = { version = "0.1.0", path = "./kine-core" }
+kine-icu = { version = "0.1.0", path = "./kine-icu" }
 num-integer = "0.1.45"
 
 [patch.crates-io]
