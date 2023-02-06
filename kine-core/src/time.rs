@@ -3,7 +3,7 @@ use core::{
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
-use crate::{Calendar, CalendarTime, Duration, TimeResult, WrittenTime, WrittenTimeResult};
+use crate::{Calendar, CalendarTime, Duration, TimeResult, WrittenTime};
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
 
@@ -66,10 +66,7 @@ impl Time {
     }
 
     /// Write the current time in a given calendar
-    pub fn write<Cal: Calendar>(
-        &self,
-        cal: Cal,
-    ) -> crate::Result<WrittenTimeResult<WrittenTime<Cal>>> {
+    pub fn write<Cal: Calendar>(&self, cal: Cal) -> crate::Result<WrittenTime<Cal>> {
         cal.write(self)
     }
 

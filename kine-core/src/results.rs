@@ -1,59 +1,5 @@
 use crate::Time;
 
-// TODO: consider removing WrittenTimeResult altogether as I don't think it's
-// actually useful compared to just always returning one written time
-
-/// The result of trying to write a time in a calendar system
-///
-/// Note that it is assumed that a calendar will return [`Error::OutOfRange`] if
-/// it cannot represent the time. Calendars that would not support some times in
-/// the middle of their range should just consider that these times are out of
-/// range.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum WrittenTimeResult<T> {
-    /// There was exactly one way of writing the time
-    ///
-    /// This is the "normal path."
-    One(T),
-
-    /// There were multiple ways of writing the time
-    ///
-    /// In such cases, this variant holds one instant that tries to be "representative" of
-    /// the written time.
-    ///
-    /// For instance, a calendar that would only hold gregorian days would have 24 hours for
-    /// each written time. It could choose for instance midnight or noon as a representative
-    /// time, and return it in a `Many` clause, to make it clear that the calendar does not
-    /// actually define the time.
-    ///
-    /// Note that calendars that eg. write only up to the microsecond should probably consider
-    /// returning `One` anyway, as a microsecond is reasonably small. The distinction between
-    /// the two is definitely fuzzy, so the calendar developer should take the end-user's
-    /// likely expectations into account.
-    Many(T),
-}
-
-impl<T> WrittenTimeResult<T> {
-    /// Returns any way of writing the point in time
-    ///
-    /// Note that this panics if the value of `Many` is an empty vector, but this
-    /// would be an ill-formed value
-    pub fn any(self) -> T {
-        match self {
-            WrittenTimeResult::One(t) => t,
-            WrittenTimeResult::Many(t) => t,
-        }
-    }
-
-    /// Maps this function on all instances of T in this result
-    pub fn map<U>(self, f: impl FnOnce(T) -> U) -> WrittenTimeResult<U> {
-        match self {
-            WrittenTimeResult::One(t) => WrittenTimeResult::One(f(t)),
-            WrittenTimeResult::Many(t) => WrittenTimeResult::Many(f(t)),
-        }
-    }
-}
-
 /// The result of trying to figure out what real-world time matches a given written time
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TimeResult {

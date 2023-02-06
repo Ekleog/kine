@@ -25,14 +25,13 @@ impl TimeZone for Utc {
 impl Calendar for Utc {
     type Time = OffsetTime<UtcSigil>;
 
-    fn write(&self, t: &crate::Time) -> crate::Result<crate::WrittenTimeResult<Self::Time>> {
-        Ok(crate::providers::UTC.write(t)?.map(|t| {
-            Self::Time::from_pseudo_nanos_since_posix_epoch(
-                UtcSigil,
-                t.as_pseudo_nanos_since_posix_epoch(),
-                t.extra_nanos(),
-            )
-        }))
+    fn write(&self, t: &crate::Time) -> crate::Result<Self::Time> {
+        let t = crate::providers::UTC.write(t)?;
+        Ok(Self::Time::from_pseudo_nanos_since_posix_epoch(
+            UtcSigil,
+            t.as_pseudo_nanos_since_posix_epoch(),
+            t.extra_nanos(),
+        ))
     }
 }
 

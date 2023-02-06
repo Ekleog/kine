@@ -1,6 +1,6 @@
 use core::fmt::{self, Debug};
 
-use crate::{providers, Calendar, CalendarTime, OffsetTime, TimeResult, WrittenTimeResult};
+use crate::{providers, Calendar, CalendarTime, OffsetTime, TimeResult};
 
 /// A calendar that counts time like the current system clock
 ///
@@ -72,16 +72,16 @@ impl System {
 impl Calendar for System {
     type Time = SystemTime;
 
-    fn try_now(&self) -> crate::Result<WrittenTimeResult<Self::Time>> {
-        Ok(WrittenTimeResult::One(Self::now()))
+    fn try_now(&self) -> crate::Result<Self::Time> {
+        Ok(Self::now())
     }
 
-    fn now(&self) -> WrittenTimeResult<Self::Time> {
-        WrittenTimeResult::One(Self::now())
+    fn now(&self) -> Self::Time {
+        Self::now()
     }
 
-    fn write(&self, t: &crate::Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
-        providers::SYSTEM.write(t).map(|r| r.map(SystemTime))
+    fn write(&self, t: &crate::Time) -> crate::Result<Self::Time> {
+        providers::SYSTEM.write(t).map(SystemTime)
     }
 }
 

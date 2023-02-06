@@ -4,7 +4,7 @@
 use std::fmt::{self, Debug, Display};
 
 use icu_calendar::types::{IsoSecond, NanoSecond};
-use kine_core::{Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone, WrittenTimeResult};
+use kine_core::{Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone};
 
 /// Re-export of `icu_calendar` calendars
 pub mod cal {
@@ -56,35 +56,6 @@ impl<Ca: icu_calendar::AsCalendar, Tz: TimeZone> Time<Ca, Tz> {
     }
 }
 
-impl<Ca, Tz> Cal<Ca, Tz>
-where
-    Ca: Clone + icu_calendar::AsCalendar,
-    Tz: Clone + TimeZone,
-    <Tz as TimeZone>::Sigil: Clone,
-{
-    fn write_impl(
-        &self,
-        offset_time: OffsetTime<Tz::Sigil>,
-    ) -> kine_core::Result<WrittenTimeResult<Time<Ca, Tz>>> {
-        let pseudo_nanos = offset_time.as_pseudo_nanos_since_posix_epoch();
-        let extra_nanos = i128::from(offset_time.extra_nanos());
-        let (minutes, submin_pseudo_nanos) =
-            num_integer::div_mod_floor(pseudo_nanos, NANOS_IN_MINS);
-        let (seconds, nanos) =
-            num_integer::div_mod_floor(submin_pseudo_nanos + extra_nanos, NANOS_IN_SECS);
-
-        let minutes = i32::try_from(minutes).map_err(|_| kine_core::Error::OutOfRange)?;
-        let mut res = icu_calendar::DateTime::from_minutes_since_local_unix_epoch(minutes);
-        res.time.second = IsoSecond::try_from(u8::try_from(seconds).unwrap()).unwrap();
-        res.time.nanosecond = NanoSecond::try_from(u32::try_from(nanos).unwrap()).unwrap();
-
-        Ok(WrittenTimeResult::One(Time {
-            tz: offset_time.sigil().clone(),
-            time: res.to_calendar(self.cal.clone()),
-        }))
-    }
-}
-
 impl<Ca, Tz> Calendar for Cal<Ca, Tz>
 where
     Ca: Clone + icu_calendar::AsCalendar,
@@ -93,10 +64,27 @@ where
 {
     type Time = Time<Ca, Tz>;
 
-    fn write(&self, t: &kine_core::Time) -> kine_core::Result<WrittenTimeResult<Self::Time>> {
-        Ok(match t.write(self.tz.clone())? {
-            WrittenTimeResult::One(t) => self.write_impl(t)?,
-            WrittenTimeResult::Many(t) => WrittenTimeResult::Many(self.write_impl(t)?.any()),
+    fn write(&self, t: &kine_core::Time) -> kine_core::Result<Self::Time> {
+        // Convert the time to local time
+        let offset_time = t.write(self.tz.clone())?;
+
+        // Compute the number of seconds, nanoseconds and leap-second-nanoseconds
+        let pseudo_nanos = offset_time.as_pseudo_nanos_since_posix_epoch();
+        let extra_nanos = i128::from(offset_time.extra_nanos());
+        let (minutes, submin_pseudo_nanos) =
+            num_integer::div_mod_floor(pseudo_nanos, NANOS_IN_MINS);
+        let (seconds, nanos) =
+            num_integer::div_mod_floor(submin_pseudo_nanos + extra_nanos, NANOS_IN_SECS);
+
+        // Build the result
+        let minutes = i32::try_from(minutes).map_err(|_| kine_core::Error::OutOfRange)?;
+        let mut res = icu_calendar::DateTime::from_minutes_since_local_unix_epoch(minutes);
+        res.time.second = IsoSecond::try_from(u8::try_from(seconds).unwrap()).unwrap();
+        res.time.nanosecond = NanoSecond::try_from(u32::try_from(nanos).unwrap()).unwrap();
+
+        Ok(Time {
+            tz: offset_time.sigil().clone(),
+            time: res.to_calendar(self.cal.clone()),
         })
     }
 }
@@ -168,9 +156,7 @@ mod tests {
         types::{IsoSecond, NanoSecond},
         Iso,
     };
-    use kine_core::{
-        tz::Utc, Calendar, CalendarTime, Duration, TimeResult, TimeZone, WrittenTimeResult,
-    };
+    use kine_core::{tz::Utc, Calendar, CalendarTime, Duration, TimeResult, TimeZone};
 
     use crate::{Cal, Time, NANOS_IN_MINS, NANOS_IN_SECS};
 
@@ -190,13 +176,7 @@ mod tests {
         let written = time.write(Cal::new(Iso, Utc.clone()));
         let expected =
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 10).unwrap();
-        assert_eq!(
-            written,
-            Ok(WrittenTimeResult::One(Time::new(
-                Utc.get_sigil().clone(),
-                expected
-            )))
-        );
+        assert_eq!(written, Ok(Time::new(Utc.get_sigil().clone(), expected)));
     }
 
     #[test]
@@ -258,10 +238,7 @@ mod tests {
                     assert_out_of_range(t);
                     return;
                 }
-                Ok(WrittenTimeResult::Many(r)) => {
-                    panic!("Converting time to formatted ISO time returned multiple results, like {r:?}")
-                }
-                Ok(WrittenTimeResult::One(t)) => t,
+                Ok(t) => t,
             };
             let time_bis = match formatted.read() {
                 Err(kine_core::Error::OutOfRange) => {

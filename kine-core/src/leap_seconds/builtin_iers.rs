@@ -1,8 +1,7 @@
 use core::{fmt::Display, str::FromStr};
 
 use crate::{
-    tz::InvalidSigilError, Calendar, Duration, Error, OffsetTime, Sigil, Time, TimeResult,
-    TimeZone, WrittenTimeResult,
+    tz::InvalidSigilError, Calendar, Duration, Error, OffsetTime, Sigil, Time, TimeResult, TimeZone,
 };
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
@@ -98,23 +97,21 @@ impl TimeZone for BuiltinIers {
 impl Calendar for BuiltinIers {
     type Time = OffsetTime<BuiltinIersSigil>;
 
-    fn write(&self, t: &Time) -> crate::Result<WrittenTimeResult<Self::Time>> {
+    fn write(&self, t: &Time) -> crate::Result<Self::Time> {
         // Find the time in the leap seconds table
         let search = LEAP_SECS.binary_search_by_key(t, |(p, _)| *p);
 
         // Handle the easy cases of time at a leap second or after the last leap second
         let id_after = match search {
-            Ok(i) => return Ok(WrittenTimeResult::One(LEAP_SECS[i].1)),
+            Ok(i) => return Ok(LEAP_SECS[i].1),
             Err(i) if i == LEAP_SECS.len() => {
                 let (base, leaped) = LEAP_SECS.last().unwrap();
                 let pseudo_nanos =
                     leaped.as_pseudo_nanos_since_posix_epoch() + (*t - *base).nanos(); // TODO: remove derefs once Add correctly impl'd
-                return Ok(WrittenTimeResult::One(
-                    OffsetTime::from_pseudo_nanos_since_posix_epoch(
-                        BuiltinIersSigil,
-                        pseudo_nanos,
-                        0, // No extra nanos after last leap second
-                    ),
+                return Ok(OffsetTime::from_pseudo_nanos_since_posix_epoch(
+                    BuiltinIersSigil,
+                    pseudo_nanos,
+                    0, // No extra nanos after last leap second
                 ));
             }
             Err(i) => i,
@@ -134,17 +131,16 @@ impl Calendar for BuiltinIers {
         let (_next, next_leaped) = &LEAP_SECS[id_after];
         let next_leaped_nanos = next_leaped.as_pseudo_nanos_since_posix_epoch();
         if should_be >= next_leaped_nanos {
-            Ok(WrittenTimeResult::One(
-                OffsetTime::from_pseudo_nanos_since_posix_epoch(
-                    BuiltinIersSigil,
-                    next_leaped_nanos - 1,
-                    u64::try_from(should_be - next_leaped_nanos + 1)
-                        .expect("ill-formed IERS table"),
-                ),
+            Ok(OffsetTime::from_pseudo_nanos_since_posix_epoch(
+                BuiltinIersSigil,
+                next_leaped_nanos - 1,
+                u64::try_from(should_be - next_leaped_nanos + 1).expect("ill-formed IERS table"),
             ))
         } else {
-            Ok(WrittenTimeResult::One(
-                OffsetTime::from_pseudo_nanos_since_posix_epoch(BuiltinIersSigil, should_be, 0),
+            Ok(OffsetTime::from_pseudo_nanos_since_posix_epoch(
+                BuiltinIersSigil,
+                should_be,
+                0,
             ))
         }
     }
@@ -217,7 +213,7 @@ impl FromStr for BuiltinIersSigil {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Calendar, CalendarTime, Error, OffsetTime, Time, TimeResult, WrittenTimeResult};
+    use crate::{Calendar, CalendarTime, Error, OffsetTime, Time, TimeResult};
 
     use super::{BuiltinIers, BuiltinIersSigil, NANOS_IN_SECS};
 
@@ -228,8 +224,10 @@ mod tests {
         // After the posix epoch, all is nice: there is no offset.
         assert_eq!(
             Time::from_nanos_since_posix_epoch(HALF_SEC).write(BuiltinIers),
-            Ok(WrittenTimeResult::One(
-                OffsetTime::from_pseudo_nanos_since_posix_epoch(BuiltinIersSigil, HALF_SEC, 0)
+            Ok(OffsetTime::from_pseudo_nanos_since_posix_epoch(
+                BuiltinIersSigil,
+                HALF_SEC,
+                0
             ))
         );
         assert_eq!(
@@ -242,12 +240,10 @@ mod tests {
         // Before the posix epoch, nothing is nice: there is a 10s offset.
         assert_eq!(
             Time::from_nanos_since_posix_epoch(-HALF_SEC).write(BuiltinIers),
-            Ok(WrittenTimeResult::One(
-                OffsetTime::from_pseudo_nanos_since_posix_epoch(
-                    BuiltinIersSigil,
-                    -1,
-                    u64::try_from(19 * HALF_SEC + 1).unwrap(),
-                )
+            Ok(OffsetTime::from_pseudo_nanos_since_posix_epoch(
+                BuiltinIersSigil,
+                -1,
+                u64::try_from(19 * HALF_SEC + 1).unwrap(),
             ))
         );
         assert_eq!(
@@ -273,10 +269,7 @@ mod tests {
                     assert_out_of_range(t);
                     return;
                 }
-                Ok(WrittenTimeResult::Many(r)) => {
-                    panic!("Converting time to leaped time returned multiple results, like {r:?}")
-                }
-                Ok(WrittenTimeResult::One(t)) => t,
+                Ok(t) => t,
             };
             let time_bis = match leaped.read() {
                 Err(Error::OutOfRange) => {

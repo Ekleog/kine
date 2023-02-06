@@ -15,7 +15,7 @@ pub mod tz;
 
 pub use calendar::{Calendar, CalendarTime};
 pub use duration::Duration;
-pub use results::{Error, Result, TimeResult, WrittenTimeResult};
+pub use results::{Error, Result, TimeResult};
 pub use system::{System, SystemTime};
 pub use time::Time;
 pub use timezone::{OffsetTime, ParseError, Sigil, TimeZone};
