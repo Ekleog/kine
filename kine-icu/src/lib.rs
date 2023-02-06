@@ -1,7 +1,7 @@
 #![doc = include_str!("../../README.md")]
 #![warn(missing_docs)]
 
-use std::fmt::{self, Debug, Display};
+use std::fmt::{self, Debug};
 
 use icu_calendar::types::{IsoSecond, NanoSecond};
 use kine_core::{Calendar, CalendarTime, OffsetTime, TimeResult, TimeZone};
