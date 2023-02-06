@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"derive":[["ZeroFrom","Custom derive for `zerofrom::ZeroFrom`,"]]};

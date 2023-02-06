@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":[["ErasedDestructor","Dummy trait that lets us `dyn Drop`"]],"type":[["ErasedArcCart","A type-erased Cart that has `Arc` semantics"],["ErasedBoxCart","A type-erased Cart that has `Box` semantics"],["ErasedRcCart","A type-erased Cart that has `Rc` semantics"]]};

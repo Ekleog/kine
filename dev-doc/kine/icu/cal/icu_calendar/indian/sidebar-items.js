@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Indian","The Indian National Calendar (aka the Saka calendar)"],["IndianDateInner","The inner date type used for representing [`Date`]s of [`Indian`]. See [`Date`] and [`Indian`] for more details."]]};

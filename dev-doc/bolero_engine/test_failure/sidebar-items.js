@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["TestFailure","Contains information about a test failure"]]};

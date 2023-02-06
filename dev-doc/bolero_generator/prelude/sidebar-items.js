@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"derive":[["TypeGenerator","Derive the an implementation of `TypeGenerator` for the given type."]]};

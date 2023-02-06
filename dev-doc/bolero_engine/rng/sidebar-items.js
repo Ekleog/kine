@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["RngEngine","Test engine implementation using a RNG."]]};

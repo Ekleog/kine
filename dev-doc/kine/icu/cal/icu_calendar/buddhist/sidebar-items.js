@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Buddhist","The Thai Solar Buddhist Calendar"]]};

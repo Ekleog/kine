@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"trait":[["UpcastDataPayload","Trait to allow conversion from `DataPayload<T>` to `DataPayload<S>`."]]};

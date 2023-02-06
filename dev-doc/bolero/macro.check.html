@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Execute tests for a given target"><title>check in bolero - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-2c6d069be585f4e9.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../static.files/light-f501212b8b071243.css"><link rel="stylesheet" disabled href="../static.files/dark-e92fc12c34ff89d3.css"><link rel="stylesheet" disabled href="../static.files/ayu-c8c85693c8a4f9db.css"><script id="default-settings" ></script><script src="../static.files/storage-ff4706381ddb2707.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-02cbe07fc548e88c.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc macro"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="logo-container" href="../bolero/index.html"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><h2></h2></nav><nav class="sidebar"><a class="logo-container" href="../bolero/index.html"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><div class="sidebar-elems"><h2><a href="index.html">In bolero</a></h2></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Macro <a href="index.html">bolero</a>::<wbr><a class="macro" href="#">check</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/bolero/lib.rs.html#110-154">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><span class="macro">macro_rules! </span>check {
+    () =&gt; { ... };
+    (<span class="macro-nonterminal">$fun</span>:path) =&gt; { ... };
+    (| <span class="macro-nonterminal">$input</span>:ident $(: <span class="kw-2">&amp;</span>[u8])<span class="question-mark">? </span>| <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">expr</span>) =&gt; { ... };
+    (| <span class="macro-nonterminal">$input</span>:ident : <span class="macro-nonterminal">$ty</span>:ty | <span class="macro-nonterminal">$</span><span class="kw">impl</span>:<span class="macro-nonterminal">expr</span>) =&gt; { ... };
+    (name = <span class="macro-nonterminal">$target_name</span>:expr) =&gt; { ... };
+}</pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Execute tests for a given target</p>
+<p>This should be executed in a separate test target, for example
+<code>tests/my_test_target/main.rs</code>.</p>
+<h2 id="examples"><a href="#examples">Examples</a></h2>
+<p>By default, <code>input</code> is a <code>&amp;[u8]</code>.</p>
+<p>This mode is generally used when testing an implementation that
+handles raw bytes, e.g. a parser.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bolero::check;
+
+<span class="macro">check!</span>().for_each(|input| {
+    <span class="comment">// implement checks here
+</span>});</code></pre></div>
+<p>Calling <code>with_type::&lt;Type&gt;()</code> will generate random values of <code>Type</code>
+to be tested. <code>Type</code> is required to implement <a href="generator/trait.TypeGenerator.html" title="generator::TypeGenerator"><code>generator::TypeGenerator</code></a>
+in order to use this method.</p>
+<p>This mode is used for testing an implementation that requires
+structured input.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bolero::check;
+
+<span class="macro">check!</span>()
+    .with_type::&lt;(u8, u16)&gt;()
+    .for_each(|(a, b)| {
+        <span class="comment">// implement checks here
+    </span>});</code></pre></div>
+<p>The function <code>with_generator::&lt;Generator&gt;(generator)</code> will use the provided <code>Generator</code>,
+which implements <a href="generator/trait.ValueGenerator.html" title="generator::ValueGenerator"><code>generator::ValueGenerator</code></a>, to generate input
+values of type <code>Generator::Output</code>.</p>
+<p>This mode is used for testing an implementation that requires
+structured input with specific constraints applied to the type.
+In the following example, we are only interested in generating
+two values, one being between 0 and 100, the other: 10 and 50.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bolero::check;
+
+<span class="macro">check!</span>()
+    .with_generator((<span class="number">0</span>..<span class="number">100</span>, <span class="number">10</span>..<span class="number">50</span>))
+    .for_each(|(a, b)| {
+        <span class="comment">// implement checks here
+    </span>});</code></pre></div>
+<p>For compatibility purposes, <code>bolero</code> also supports the same interface as
+<a href="https://github.com/rust-fuzz/afl.rs">rust-fuzz/afl.rs</a>. This usage
+has a few downsides:</p>
+<ul>
+<li>The test cannot be configured</li>
+<li>The test code will be contained inside a macro which can trip up
+some editors and IDEs.</li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>bolero::check;
+
+<span class="macro">check!</span>(|input| {
+    <span class="comment">// implement checks here
+</span>});</code></pre></div>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="bolero" data-themes="" data-resource-suffix="" data-rustdoc-version="1.69.0-nightly (dc1d9d50f 2023-01-31)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-f0c5c39777a9a2f6.js" data-settings-css="settings-7c23ac01f615ce90.css" ></div></body></html>

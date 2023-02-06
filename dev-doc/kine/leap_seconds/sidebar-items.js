@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["BuiltinIers","Leap second provider that uses the builtin, latest-at-the-time-of-last-`kine-core`-update IERS leap second table."],["BuiltinIersSigil","The sigil for the built-in IERS table"]]};

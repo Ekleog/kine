@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["cal","Re-export of `icu_calendar` calendars"]],"struct":[["Cal","A calendar based on icu4x"],["Time","A time represented with an icu4x calendar and any kine timezone"]]};

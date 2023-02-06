@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Julian","The Julian Calendar"],["JulianDateInner","The inner date type used for representing [`Date`]s of [`Julian`]. See [`Date`] and [`Julian`] for more details."]]};

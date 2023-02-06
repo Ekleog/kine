@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["shrink","Shrink the input to a simpler form"]]};
