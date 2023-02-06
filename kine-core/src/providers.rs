@@ -13,7 +13,7 @@ cfg_if::cfg_if! {
         ///
         /// Stability note: The real type of is currently exposed only because
         /// type_alias_impl_trait is still unstable. IT WILL BE TURNED INTO
-        /// `impl ~const Default + Clone + TimeZone` IN A MINOR RELEASE!
+        /// `impl ~const Default + Clone + Copy + TimeZone` IN A MINOR RELEASE!
         /// And once extern existential types get done and stable, the various feature flags
         /// will be replaced with making this existential type extern (but will be kept there
         /// for backwards compatibility until the next major release)
@@ -50,7 +50,7 @@ cfg_if::cfg_if! {
         ///
         /// Stability note: The real type of is currently exposed only because
         /// type_alias_impl_trait is still unstable. IT WILL BE TURNED INTO
-        /// `impl ~const Default + Clone + TimeZone` IN A MINOR RELEASE!
+        /// `impl ~const Default + Clone + Copy + TimeZone` IN A MINOR RELEASE!
         /// And once extern existential types get done and stable, the various feature flags
         /// will be replaced with making this existential type extern (but will be kept there
         /// for backwards compatibility until the next major release)

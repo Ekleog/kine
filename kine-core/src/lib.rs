@@ -16,9 +16,7 @@ pub use time::Time;
 pub mod timezone;
 pub use timezone::{OffsetTime, Sigil, TimeZone};
 
-pub mod tz {
-    pub use crate::providers::{Utc, UTC};
-}
+pub mod tz;
 
 /// A date and time as indicated by a calendar
 ///

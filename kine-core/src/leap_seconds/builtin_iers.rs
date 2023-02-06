@@ -1,7 +1,8 @@
 use core::{fmt::Display, str::FromStr};
 
 use crate::{
-    Calendar, Duration, Error, OffsetTime, Sigil, Time, TimeResult, TimeZone, WrittenTimeResult,
+    tz::InvalidSigil, Calendar, Duration, Error, OffsetTime, Sigil, Time, TimeResult, TimeZone,
+    WrittenTimeResult,
 };
 
 const NANOS_IN_SECS: i128 = 1_000_000_000;
@@ -76,7 +77,7 @@ static LEAP_SECS: [(Time, OffsetTime<BuiltinIersSigil>); 28] = make_table![
 /// IERS leap second table.
 // TODO: Make Copy again when clippy no longer complains about an unused clone
 // (ie. when System will be a proper existential trait)
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BuiltinIers;
 
 impl BuiltinIers {
@@ -156,9 +157,12 @@ impl Default for BuiltinIers {
 }
 
 /// The sigil for the built-in IERS table
+///
+/// Valid sigils, in written form, are "", " IERS" and " IERS-C??" where "??"
+/// is the number of the bulletin that is currently being built-in.
 // TODO: Make Copy again when clippy no longer complains about an unused clone
 // (ie. when System will be a proper existential trait)
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BuiltinIersSigil;
 
 impl Sigil for BuiltinIersSigil {
@@ -199,15 +203,6 @@ impl Display for BuiltinIersSigil {
         f.write_str(BULLETIN)
     }
 }
-
-/// The passed sigil was not one of the valid ones
-///
-/// Valid ones are "", " IERS" and " IERS-C??" where "??" is the number of the bulletin
-/// that is currently being built-in.
-#[derive(Clone, Copy, Debug)]
-pub struct InvalidSigil;
-
-// TODO: derive Error for InvalidSigil
 
 impl FromStr for BuiltinIersSigil {
     type Err = InvalidSigil;
