@@ -41,7 +41,7 @@ impl Time {
     pub fn try_now() -> crate::Result<TimeResult> {
         // TODO: Introduce hacks to really always be monotonic, eg. based on std::Instant
         // after the first time a duration was acquired?
-        crate::System::now().read()
+        crate::tz::System::now().read()
     }
 
     /// Return the current time

@@ -6,7 +6,6 @@ mod calendar;
 mod duration;
 mod providers;
 mod results;
-mod system;
 mod time;
 mod timezone;
 
@@ -16,7 +15,6 @@ pub mod tz;
 pub use calendar::{Calendar, CalendarTime};
 pub use duration::Duration;
 pub use results::{Error, Result, TimeResult};
-pub use system::{System, SystemTime};
 pub use time::Time;
 pub use timezone::{OffsetTime, ParseError, Sigil, TimeZone};
 
