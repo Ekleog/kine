@@ -31,6 +31,10 @@ pub struct Cal<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
 }
 
 /// A time represented with an icu4x calendar and any kine timezone
+///
+/// Note that the `Debug` implementation of this trait shows ISO 8601; but you
+/// should use the methods from `icu4x` to display the time in a proper format
+/// for your user.
 #[derive(Clone, Eq, PartialEq)]
 pub struct Time<Ca: icu_calendar::AsCalendar, Tz: TimeZone> {
     tz: Tz::Sigil,
@@ -125,8 +129,8 @@ where
     }
 }
 
-impl<Tz: TimeZone> Display for Time<icu_calendar::Iso, Tz> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
+impl<Tz: TimeZone> Debug for Time<icu_calendar::Iso, Tz> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let date = &self.time.date;
         let time = &self.time.time;
         write!(
@@ -141,12 +145,6 @@ impl<Tz: TimeZone> Display for Time<icu_calendar::Iso, Tz> {
             time.nanosecond.number(),
             self.tz,
         )
-    }
-}
-
-impl<Tz: TimeZone> Debug for Time<icu_calendar::Iso, Tz> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        <Self as Display>::fmt(self, f)
     }
 }
 
