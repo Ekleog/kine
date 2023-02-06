@@ -1,4 +1,4 @@
-use crate::{leap_seconds::BuiltinIers, TimeZone};
+use crate::leap_seconds::{BuiltinIers, BuiltinIersSigil};
 
 cfg_if::cfg_if! {
     if #[cfg(doc)] {
@@ -19,8 +19,14 @@ cfg_if::cfg_if! {
         /// for backwards compatibility until the next major release)
         pub type System = BuiltinIers;
 
+        /// Sigil for the system timezone provider, convenience
+        ///
+        /// Stability note: See System.
+        pub type SystemSigil = BuiltinIersSigil;
+
     } else if #[cfg(feature = "tz-system-provider-builtin-iers")] {
         pub type System = BuiltinIers;
+        pub type SystemSigil = BuiltinIersSigil;
     } else {
         compile_error!("Please define (exactly) one system timezone provider feature (tz-system-provider-*)");
     }
@@ -34,11 +40,7 @@ cfg_if::cfg_if! {
 /// change once it's possible to encode the fact that `default()` needs to be `const`, but
 /// the things you can do with it will mostly change when `System` will change.
 pub static SYSTEM: System = System::const_default();
-
-/// Sigil for the system timezone provider, convenience
-///
-/// Stability note: See SYSTEM.
-pub type SystemSigil = <System as TimeZone>::Sigil;
+pub static SYSTEM_SIGIL: SystemSigil = SystemSigil::const_default();
 
 cfg_if::cfg_if! {
     if #[cfg(doc)] {
@@ -56,8 +58,14 @@ cfg_if::cfg_if! {
         /// for backwards compatibility until the next major release)
         pub type Utc = BuiltinIers;
 
+        /// Sigil for UTC leap seconds provider, as a convenience
+        ///
+        /// Stability note: See Utc.
+        pub type UtcSigil = BuiltinIersSigil;
+
     } else if #[cfg(feature = "tz-utc-provider-builtin-iers")] {
         pub type Utc = BuiltinIers;
+        pub type UtcSigil = BuiltinIersSigil;
     } else {
         compile_error!("Please define (exactly) one UTC leap seconds provider feature (tz-utc-provider-*)");
     }
@@ -71,8 +79,4 @@ cfg_if::cfg_if! {
 /// change once it's possible to encode the fact that `default()` needs to be `const`, but
 /// the things you can do with it will mostly change when `Utc` will change.
 pub static UTC: Utc = Utc::const_default();
-
-/// Sigil for UTC leap seconds provider, as a convenience
-///
-/// Stability note: See UTC.
-pub type UtcSigil = <Utc as TimeZone>::Sigil;
+pub static UTC_SIGIL: UtcSigil = UtcSigil::const_default();

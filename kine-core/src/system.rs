@@ -45,8 +45,6 @@ impl System {
     // in we can allow extern implementations of this?
     #[cfg(feature = "std")]
     fn now_impl() -> SystemTime {
-        use crate::TimeZone;
-
         let duration = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("Current time was before posix epoch");
@@ -57,7 +55,7 @@ impl System {
         // TODO: Introduce an implementation of `Time::now()` based on other clocks for platforms that
         // can so this is not the best precision we could have.
         SystemTime(OffsetTime::from_pseudo_nanos_since_posix_epoch(
-            *providers::SYSTEM.get_sigil(),
+            providers::SYSTEM_SIGIL,
             pseudo_nanos,
             extra_nanos,
         ))

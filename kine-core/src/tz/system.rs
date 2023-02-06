@@ -19,10 +19,6 @@ pub struct SystemSigil;
 
 impl TimeZone for System {
     type Sigil = SystemSigil;
-
-    fn get_sigil(&self) -> &Self::Sigil {
-        &SystemSigil
-    }
 }
 
 impl Calendar for System {
@@ -41,7 +37,7 @@ impl Calendar for System {
 impl Sigil for SystemSigil {
     fn read(&self, t: &OffsetTime<Self>) -> crate::Result<crate::TimeResult> {
         OffsetTime::<crate::providers::SystemSigil>::from_pseudo_nanos_since_posix_epoch(
-            *crate::providers::UTC.get_sigil(),
+            crate::providers::SYSTEM_SIGIL,
             t.as_pseudo_nanos_since_posix_epoch(),
             t.extra_nanos(),
         )

@@ -16,9 +16,6 @@ pub trait TimeZone: Calendar<Time = OffsetTime<Self::Sigil>> + Eq + PartialEq {
     ///
     /// This is basically metadata added to all `OffsetTime`s.
     type Sigil: Sigil;
-
-    /// Return the (one of the) sigil(s) this time zone provider can be identified with
-    fn get_sigil(&self) -> &Self::Sigil;
 }
 
 /// The sigil for a time zone

@@ -88,10 +88,6 @@ impl BuiltinIers {
 
 impl TimeZone for BuiltinIers {
     type Sigil = BuiltinIersSigil;
-
-    fn get_sigil(&self) -> &BuiltinIersSigil {
-        &BuiltinIersSigil
-    }
 }
 
 impl Calendar for BuiltinIers {
@@ -160,6 +156,12 @@ impl Default for BuiltinIers {
 // (ie. when System will be a proper existential trait)
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct BuiltinIersSigil;
+
+impl BuiltinIersSigil {
+    pub(crate) const fn const_default() -> BuiltinIersSigil {
+        BuiltinIersSigil
+    }
+}
 
 impl Sigil for BuiltinIersSigil {
     fn read(&self, t: &OffsetTime<Self>) -> crate::Result<TimeResult> {

@@ -156,7 +156,10 @@ mod tests {
         types::{IsoSecond, NanoSecond},
         Iso,
     };
-    use kine_core::{tz::Utc, Calendar, CalendarTime, Duration, TimeResult, TimeZone};
+    use kine_core::{
+        tz::{Utc, UtcSigil},
+        Calendar, CalendarTime, Duration, TimeResult,
+    };
 
     use crate::{Cal, Time, NANOS_IN_MINS, NANOS_IN_SECS};
 
@@ -176,14 +179,14 @@ mod tests {
         let written = time.write(Cal::new(Iso, Utc.clone()));
         let expected =
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 10).unwrap();
-        assert_eq!(written, Ok(Time::new(Utc.get_sigil().clone(), expected)));
+        assert_eq!(written, Ok(Time::new(UtcSigil, expected)));
     }
 
     #[test]
     fn leap_second_reads_correctly() {
         // Normal behavior with one second
         let mut time: Time<Iso, Utc> = Time::new(
-            Utc.get_sigil().clone(),
+            UtcSigil,
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 60).unwrap(),
         );
         assert_eq!(
@@ -214,7 +217,7 @@ mod tests {
     #[test]
     fn negative_time_reads_correctly() {
         let time: Time<Iso, Utc> = Time::new(
-            Utc.get_sigil().clone(),
+            UtcSigil,
             icu_calendar::DateTime::try_new_iso_datetime(1969, 12, 31, 23, 59, 10).unwrap(),
         );
         let read = time.read();
